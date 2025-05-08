@@ -2,9 +2,9 @@ name: Build Frontend
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main, develop, criando-actions ]
   pull_request:
-    branches: [ main, develop ]
+    branches: [ main, develop, criando-actions ]
 
 jobs:
   build:
