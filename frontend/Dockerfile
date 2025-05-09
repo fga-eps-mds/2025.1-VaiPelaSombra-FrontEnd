@@ -11,7 +11,8 @@ RUN npm install --no-optional
 RUN npm rebuild @swc/core
 
 # Instala manualmente o binding do Rollup
-RUN mkdir -p node_modules/@rollup && \
+RUN apk add --no-cache curl && \
+    mkdir -p node_modules/@rollup && \
     curl -L https://registry.npmjs.org/@rollup/rollup-linux-x64-gnu/-/rollup-linux-x64-gnu-4.40.2.tgz -o rollup.tgz && \
     tar -xzf rollup.tgz && mv package node_modules/@rollup/rollup-linux-x64-gnu
 
