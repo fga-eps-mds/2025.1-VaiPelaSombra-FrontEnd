@@ -23,7 +23,7 @@ jobs:
         run: |
           rm -rf node_modules package-lock.json
           npm cache clean --force
-          npm install --omit=optional --legacy-peer-deps
+          npm install --no-optional --legacy-peer-deps
         working-directory: ./frontend
 
       - name: Build project
