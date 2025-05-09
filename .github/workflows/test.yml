@@ -17,8 +17,8 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      - name: Build Docker image
-        run: docker build -t frontend-image -f ./frontend/Dockerfile ./frontend
+      - name: Build Docker image (build stage only)
+        run: docker build --target build -t frontend-test -f ./frontend/Dockerfile ./frontend
 
-      - name: Run tests inside container
-        run: docker run --rm frontend-image npm run test -- --watchAll=false
+      - name: Run tests inside build container
+        run: docker run --rm frontend-test npm run test -- --watchAll=false
