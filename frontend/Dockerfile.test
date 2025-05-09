@@ -6,8 +6,8 @@ WORKDIR /app
 # Copia apenas arquivos necessários para instalar dependências
 COPY package.json package-lock.json ./
 
-# Instala todas as dependências (incluindo devDependencies)
-RUN npm install --no-optional
+# Instala as dependências (incluindo devDependencies) usando npm ci
+RUN npm ci --no-optional
 
 # Copia o restante do código
 COPY . .
