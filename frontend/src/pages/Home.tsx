@@ -1,4 +1,3 @@
-import React from "react";
 import NavigateButton from "../components/NavigateButton"
 import { useAppContext } from "../context/AppContext"
 
