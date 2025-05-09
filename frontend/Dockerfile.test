@@ -1,0 +1,16 @@
+# Etapa de testes
+FROM node:20-slim
+
+WORKDIR /app
+
+# Copia apenas arquivos necessários para instalar dependências
+COPY package.json package-lock.json ./
+
+# Instala as dependências (incluindo devDependencies) usando npm ci
+RUN npm ci --no-optional
+
+# Copia o restante do código
+COPY . .
+
+# Executa os testes diretamente ao rodar o container
+CMD ["npm", "run", "test", "--", "--watchAll=false"]
