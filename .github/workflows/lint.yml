@@ -2,10 +2,9 @@ name: Lint Frontend
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main, develop, criando-actions ]
   pull_request:
-    branches: [ main, develop ]
-
+    branches: [ main, develop, criando-actions ]
 jobs:
   lint:
     runs-on: ubuntu-latest

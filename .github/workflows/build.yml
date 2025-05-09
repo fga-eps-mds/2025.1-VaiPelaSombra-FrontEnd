@@ -26,9 +26,11 @@ jobs:
       - name: Manually install rollup native binding (Linux x64)
         run: |
           mkdir -p node_modules/@rollup
-          curl -L https://registry.npmjs.org/@rollup/rollup-linux-x64-gnu/-/rollup-linux-x64-gnu-4.40.2.tgz | tar -xz -C node_modules/@rollup/
+          curl -L https://registry.npmjs.org/@rollup/rollup-linux-x64-gnu/-/rollup-linux-x64-gnu-4.40.2.tgz -o rollup.tgz
+          tar -xzf rollup.tgz
+          mv package node_modules/@rollup/rollup-linux-x64-gnu
         working-directory: ./frontend
-
+        
       - name: Build project
         run: npm run build
         working-directory: ./frontend
