@@ -1,0 +1,19 @@
+# Etapa de build para testes
+FROM node:20-slim AS test
+
+WORKDIR /app
+
+# Copia apenas os arquivos de dependência
+COPY package.json package-lock.json ./
+
+# Instala todas as dependências, incluindo devDependencies
+RUN npm ci
+
+# Copia o restante da aplicação
+COPY . .
+
+# Reinstala o binding correto do @swc/core para evitar erros no ambiente Linux
+RUN npm rebuild @swc/core
+
+# Executa os testes
+CMD ["npm", "run", "test", "--", "--watchAll=false"]
