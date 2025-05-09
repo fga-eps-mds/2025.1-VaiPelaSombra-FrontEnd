@@ -19,13 +19,13 @@ jobs:
         with:
           node-version: 20
 
-      - name: Clean and reinstall dependencies
-        run: |
-          rm -rf node_modules package-lock.json
-          npm cache clean --force
-          ROLLUP_NO_BINARY=true npm install --no-optional --legacy-peer-deps
+      - name: Install pnpm
+        run: npm install -g pnpm
+
+      - name: Install dependencies with pnpm
+        run: pnpm install --no-optional
         working-directory: ./frontend
 
       - name: Build project
-        run: npm run build
+        run: pnpm run build
         working-directory: ./frontend
