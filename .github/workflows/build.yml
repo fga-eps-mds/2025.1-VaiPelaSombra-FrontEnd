@@ -14,27 +14,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 20
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
 
-      - name: Install dependencies
-        run: npm install --no-optional
-        working-directory: ./frontend
-
-      - name: Rebuild native binding for @swc/core
-        run: npm rebuild @swc/core
-        working-directory: ./frontend
-
-      - name: Manually install rollup native binding (Linux x64)
-        run: |
-          mkdir -p node_modules/@rollup
-          curl -L https://registry.npmjs.org/@rollup/rollup-linux-x64-gnu/-/rollup-linux-x64-gnu-4.40.2.tgz -o rollup.tgz
-          tar -xzf rollup.tgz
-          mv package node_modules/@rollup/rollup-linux-x64-gnu
-        working-directory: ./frontend
-
-      - name: Build project
-        run: npm run build
-        working-directory: ./frontend
+      - name: Build Docker image
+        run: docker build -t frontend-build-test ./frontend
