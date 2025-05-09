@@ -23,6 +23,10 @@ jobs:
         run: npm install --no-optional
         working-directory: ./frontend
 
+      - name: Rebuild native binding for @swc/core
+        run: npm rebuild @swc/core
+        working-directory: ./frontend
+
       - name: Manually install rollup native binding (Linux x64)
         run: |
           mkdir -p node_modules/@rollup
@@ -30,7 +34,7 @@ jobs:
           tar -xzf rollup.tgz
           mv package node_modules/@rollup/rollup-linux-x64-gnu
         working-directory: ./frontend
-        
+
       - name: Build project
         run: npm run build
         working-directory: ./frontend
