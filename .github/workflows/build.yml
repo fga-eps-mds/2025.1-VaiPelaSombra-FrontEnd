@@ -19,13 +19,16 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install pnpm
-        run: npm install -g pnpm
+      - name: Install dependencies
+        run: npm install --no-optional
+        working-directory: ./frontend
 
-      - name: Install dependencies with pnpm
-        run: pnpm install --no-optional
+      - name: Manually install rollup native binding (Linux x64)
+        run: |
+          mkdir -p node_modules/@rollup
+          curl -L https://registry.npmjs.org/@rollup/rollup-linux-x64-gnu/-/rollup-linux-x64-gnu-4.40.2.tgz | tar -xz -C node_modules/@rollup/
         working-directory: ./frontend
 
       - name: Build project
-        run: pnpm run build
+        run: npm run build
         working-directory: ./frontend
