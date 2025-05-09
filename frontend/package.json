@@ -9,7 +9,8 @@
     "lint": "eslint . --ext .ts,.tsx",
     "preview": "vite preview",
     "lint:fix": "eslint . --ext .ts,.tsx --fix",
-    "test": "jest"
+    "test": "jest",
+    "postinstall": "npm rebuild @swc/core"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
