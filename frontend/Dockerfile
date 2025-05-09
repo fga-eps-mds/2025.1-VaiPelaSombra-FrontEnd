@@ -1,4 +1,4 @@
-# Etapa de build usando Node.js baseado em Debian (glibc, não musl)
+# Etapa de build usando Node.js baseado em Debian (glibc)
 FROM node:20-slim AS build
 
 WORKDIR /app
@@ -6,8 +6,14 @@ WORKDIR /app
 # Copia os arquivos de dependência
 COPY package.json package-lock.json ./
 
-# Instala as dependências com o ambiente Debian, sem erro de bindings
+# Instala dependências
 RUN npm install --no-optional
+
+# Instala binding correto do rollup para glibc
+RUN apt-get update && apt-get install -y curl && \
+    mkdir -p node_modules/@rollup && \
+    curl -L https://registry.npmjs.org/@rollup/rollup-linux-x64-gnu/-/rollup-linux-x64-gnu-4.40.2.tgz -o rollup.tgz && \
+    tar -xzf rollup.tgz && mv package node_modules/@rollup/rollup-linux-x64-gnu
 
 # Copia o restante do projeto e executa o build
 COPY . .
