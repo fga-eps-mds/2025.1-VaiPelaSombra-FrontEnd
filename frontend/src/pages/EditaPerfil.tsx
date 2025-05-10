@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from "react"
 import NavigateButton from "../components/NavigateButton"
 import { useAppContext } from "../context/AppContext"
+import ModalProfile from "../components/Modal"
 
 export default function EditaPerfil() {
 
@@ -63,6 +64,14 @@ export default function EditaPerfil() {
         </div>
         <div>
           Preferencias  
+          <ModalProfile
+            isOpen={openModal}
+            onClose={() => setOpenModal(false)}
+            onSave={(data) => {
+              console.log("Preferências salvas:", data);
+              setOpenModal(false);
+            }}
+          />
           <button onClick={handleChangeModal}>Abrir Modal</button>            
         </div>
       </div>
