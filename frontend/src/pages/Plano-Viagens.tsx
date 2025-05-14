@@ -6,17 +6,16 @@ function Home() {
 
   return (
     <div>
-      <h1>Home Page</h1>
-      <p>Bem-vindo à página inicial!</p>
+      <h1>Plano de Viagens</h1>
+      <p>é aqui que se deveria ter o plano, provavelmente...</p>
       <p>Tema atual: {theme}</p>
-      <p>Se quiser alterar o tema, vá para página seguinte!</p>
 
       <button onClick={() => setTheme(theme === "light" ? "dark" : "light")}>
         Alternar tema
       </button>
 
       <NavigateButton to="/example-page" label="Ir para a página Example" />
-      <NavigateButton to="/Plano-Viagens" label="Ir para Plano de Viagens" />
+      <NavigateButton to="/Home" label="Ir para Home" />
     </div>
   )
 }
