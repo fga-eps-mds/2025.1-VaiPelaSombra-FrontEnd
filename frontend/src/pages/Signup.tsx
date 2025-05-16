@@ -33,7 +33,7 @@ export default function Signup() {
 }
 
 export function CardWithForm() {
-    
+
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -69,7 +69,7 @@ export function CardWithForm() {
         setSuccessMessage('Cadastro realizado com sucesso!');
     };
 
-    
+
 
     return (
         <Card className="w-100">
@@ -147,21 +147,17 @@ export function CardWithForm() {
                 <CardFooter className="flex flex-col w-full gap-4">
                     <Button
                         type="submit"
-                        className="w-full bg-[#223A60] hover:bg-[#2F4A80] text-white transition-colors cursor-pointer">   
+                        className="w-full bg-[#223A60] hover:bg-[#2F4A80] text-white transition-colors cursor-pointer">
+                        Criar uma conta
                     </Button>
-                    <div className="flex items-center w-full gap-4">
-                        <Separator className="flex-1 h-px bg-border" />
-                        <span className="text-sm text-muted-foreground">OU</span>
-                        <Separator className="flex-1 h-px bg-border" />
-                    </div>
 
                 </CardFooter>
             </form>
             {successMessage && (
-            <div style={{ color: 'green', margin: '16px', textAlign: 'center' }}>
-                {successMessage}
-            </div>
-        )}
+                <div style={{ color: 'green', margin: '16px', textAlign: 'center' }}>
+                    {successMessage}
+                </div>
+            )}
         </Card>
     )
 }
