@@ -33,6 +33,7 @@ export default function Signup() {
 }
 
 export function CardWithForm() {
+    
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -40,6 +41,7 @@ export function CardWithForm() {
     const [verSenha, setVerSenha] = useState(false);
     const [confirmarverSenha, setConfirmarVerSenha] = useState(false);
     const [erro, setErro] = useState('');
+    const [successMessage, setSuccessMessage] = useState('');
 
     const isEmpty = (value: string): boolean => value.trim() === '';
 
@@ -64,7 +66,10 @@ export function CardWithForm() {
         setEmail('');
         setPassword('');
         setConfirmPassword('');
+        setSuccessMessage('Cadastro realizado com sucesso!');
     };
+
+    
 
     return (
         <Card className="w-100">
@@ -73,6 +78,7 @@ export function CardWithForm() {
                 <CardDescription>Crie a sua conta já!</CardDescription>
             </CardHeader>
             <form onSubmit={handleSubmit}>
+
                 <CardContent className="mb-4">
                     <div className="grid w-full items-center gap-4">
 
@@ -139,8 +145,10 @@ export function CardWithForm() {
 
                 </CardContent>
                 <CardFooter className="flex flex-col w-full gap-4">
-                    <Button className="w-full bg-[#223A60] hover:bg-[#2F4A80] text-white transition-colors cursor-pointer">Criar uma conta</Button>
-
+                    <Button
+                        type="submit"
+                        className="w-full bg-[#223A60] hover:bg-[#2F4A80] text-white transition-colors cursor-pointer">   
+                    </Button>
                     <div className="flex items-center w-full gap-4">
                         <Separator className="flex-1 h-px bg-border" />
                         <span className="text-sm text-muted-foreground">OU</span>
@@ -149,6 +157,11 @@ export function CardWithForm() {
 
                 </CardFooter>
             </form>
+            {successMessage && (
+            <div style={{ color: 'green', margin: '16px', textAlign: 'center' }}>
+                {successMessage}
+            </div>
+        )}
         </Card>
     )
 }
