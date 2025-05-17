@@ -2,6 +2,7 @@ import Navbar from "../components/NavBar.tsx";
 import TravelPlanCard from "../components/TravelPlanCard";
 import "./Plano-Viagens.css"; // Crie este arquivo para os estilos da página
 
+
 // Exemplo de dados mockados
 const travelPlans = [
   {
