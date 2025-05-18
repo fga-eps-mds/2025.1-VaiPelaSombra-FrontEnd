@@ -101,13 +101,17 @@
 
   --card: oklch(1 0 0);
 
-  --card-foreground: oklch(0.145 0 0);
+  /*#0d1a2e*/
+  --card-foreground: oklch(0.22 0.04 258.74);
+  /*--card-foreground: oklch(0.145 0 0);*/
 
   --popover: oklch(1 0 0);
 
   --popover-foreground: oklch(0.145 0 0);
 
-  --primary: oklch(0.205 0 0);
+  --primary: oklch(0.35 0.07 259.24);
+
+  /*--primary: oklch(0.205 0 0);*/
 
   --primary-foreground: oklch(0.985 0 0);
 
@@ -156,6 +160,10 @@
   --sidebar-border: oklch(0.922 0 0);
 
   --sidebar-ring: oklch(0.708 0 0);
+
+  --font-sans: DM Sans, sans-serif;
+  --font-mono: Montserrat;
+
 }
 
 /*
