@@ -1,12 +1,20 @@
-// import { useState } from "react"
+//mport { useState } from "react"
 //import { Eye, EyeOff } from "lucide-react";
 import imagem3 from '../assets/imagem3.png';
 import Google_Logo from '../assets/logo_google.svg';
 import Umbrella from '../assets/umbrella.svg';
 function Login() {
-    //const [username, setUsername] = useState("");
+    //const [email, setEmail] = useState("");
     //const [password, setPassword] = useState("");
-    return (
+    //const validateEmail = () => {
+        //if (!email || !password){
+            //return "preencha campo de email"
+        //}
+        //else if(email ){
+
+        //}
+   // }
+    //return (
     <div className="h-screen w-full flex bg-white ">
         
         <div className="h-full w-1/2 bg-cover bg-no-repeat bg-center"
@@ -28,6 +36,8 @@ function Login() {
                             type="email"
                             placeholder="Digite o seu e-mail"
                             required
+                            //value={email}
+                            //onChange={(e) => setEmail(e.target.value)}
                             />
                             </div>
 
@@ -88,7 +98,7 @@ function Login() {
         </div>
     </div>
 
-    )
+    
   }
   
   export default Login
