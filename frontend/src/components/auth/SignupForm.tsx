@@ -12,8 +12,9 @@ import {
   } from "@/components/ui/form"
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
-
-const BUTTON_TEXT = "Criar uma conta";
+import { toast } from "sonner";
+import { CircleCheckIcon } from "lucide-react";
+import { z } from "zod";
 
 export default function SignupForm() {
 
@@ -27,8 +28,11 @@ export default function SignupForm() {
             },
         });
 
-        function onSubmit() {
-            console.log('foi');
+        function onSubmit(data: z.infer<typeof SignupSchema>) {
+            // dados para o backend
+            toast(JSON.stringify(data), {
+                icon: <CircleCheckIcon className="text-emerald-500 w-5 h-5" />,
+            });
         }
 
     return (
@@ -112,7 +116,7 @@ export default function SignupForm() {
                                 </FormItem>
                             )}
                         />
-                        <Button type="submit" className="w-full mt-2 cursor-pointer">{BUTTON_TEXT}</Button>
+                        <Button type="submit" className="w-full mt-2 cursor-pointer">Criar uma conta</Button>
                     </div>
                 </form>
             </Form>
