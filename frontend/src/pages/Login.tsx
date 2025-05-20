@@ -1,9 +1,8 @@
 import { useState } from "react"
+import { useNavigate } from "react-router-dom";
 import imagem3 from '../assets/imagem3.png';
-//import Google_Logo from '../assets/logo_google.svg';
 import Umbrella from '../assets/umbrella.svg';
 import EyeToggle from '../components/ui/eye_toggle';
-
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -11,22 +10,19 @@ function Login() {
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [mostrarSenha, setMostrarSenha] = useState(false);
+  const [apiError, setApiError] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const navigate = useNavigate();
 
-    // limpa erros anteriores
+  const validarCampos = () => {
+    let valid = true;
     setEmailError("");
     setPasswordError("");
-
-    let valid = true;
 
     if (!email) {
       setEmailError("Preencha o e-mail.");
       valid = false;
-    } 
-    
-    else {
+    } else {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) {
         setEmailError("Email inválido.");
@@ -37,14 +33,47 @@ function Login() {
     if (!password) {
       setPasswordError("Preencha a senha.");
       valid = false;
-
     } else if (password.length < 6) {
       setPasswordError("A senha deve ter pelo menos 6 caracteres.");
       valid = false;
     }
 
-    if (!valid) return;
-    console.log("Usuario logado");
+    return valid;
+  };
+
+  const autenticarUsuario = async () => {
+    const response = await fetch("http://localhost:3000/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, senha: password }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Erro ao fazer login.");
+    }
+
+    //parte JWT q é token web JS
+    const data = await response.json();
+    localStorage.setItem("token", data.token);
+    navigate("/dashboard");
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setApiError("");
+
+    if (!validarCampos()) return;
+
+    try {
+      await autenticarUsuario();
+    } catch (err) {
+      if (err instanceof Error) {
+        setApiError(err.message);
+      } else {
+        setApiError("Erro ao fazer login.");
+      }
+    }
   };
 
   return (
@@ -69,8 +98,6 @@ function Login() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
-
-                {/* Erros email */}
                 {emailError && (
                   <p className="text-red-500 text-sm mt-1">{emailError}</p>
                 )}
@@ -83,24 +110,21 @@ function Login() {
                   <a href="#" className="text-sm text-[#223A60] hover:underline font-sans">Esqueceu a senha?</a>
                 </div>
                 <div className="relative w-full">
-                    <input
-                        className="w-full border-2 border-[#E5E5E5] rounded-md pl-2 pr-10 py-1.5 text-sm font-light placeholder-[#9A9A9A]"
-                        id="senha"
-                        type={mostrarSenha ? "text" : "password"}
-                        placeholder="Digite a sua senha"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
+                  <input
+                    className="w-full border-2 border-[#E5E5E5] rounded-md pl-2 pr-10 py-1.5 text-sm font-light placeholder-[#9A9A9A]"
+                    id="senha"
+                    type={mostrarSenha ? "text" : "password"}
+                    placeholder="Digite a sua senha"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                  <div className="absolute right-3 top-[50%] translate-y-[-35%] cursor-pointer">
+                    <EyeToggle
+                      visible={mostrarSenha}
+                      toggleVisibility={() => setMostrarSenha(prev => !prev)}
                     />
-                    <div className="absolute right-3 top-[50%] translate-y-[-35%] cursor-pointer">
-                        <EyeToggle
-                        visible={mostrarSenha}
-                        toggleVisibility={() => setMostrarSenha(prev => !prev)}
-                        />
-                    </div>
+                  </div>
                 </div>
-
-
-                {/* Erros senha */}
                 {passwordError && (
                   <p className="text-red-500 text-sm mt-1">{passwordError}</p>
                 )}
@@ -118,6 +142,11 @@ function Login() {
                   <label htmlFor="lembrar" className="text-xs text-[#223A60] pt-0.5">Lembrar a senha</label>
                 </div>
               </div>
+
+              {/* Erro de API */}
+              {apiError && (
+                <div className="text-red-600 text-sm font-medium px-7">{apiError}</div>
+              )}
             </div>
 
             {/* Botões */}
@@ -128,18 +157,13 @@ function Login() {
               >
                 Entrar
               </button>
-
-              {/* <button className="flex items-center justify-center gap-2 py-3 border-2 border-[#E5E5E5] rounded-md bg-white text-[#767676] hover:bg-gray-100 transition">
-                <img src={Google_Logo} alt="Ícone" className="w-6 h-6" />
-                Entrar com o Google
-              </button> */}
             </div>
 
-            {/* Slogan */}
             <div className='w-full pt-4 flex justify-row gap-1 justify-center'>
               <label className='text-sm font-md text-[#283841]'>Não tem uma conta?</label>
               <a href='#' className='underline text-sm font-md text-[#223A60]'>Cadastre-se</a>
             </div>
+            {/* Slogan */}
             <div className='w-full pt-3 flex flex-row items-center justify-center gap-1'>
               <label className='pt-3 text-sm font-md text-[#223A60]'>Vai Pela Sombra</label>
               <img src={Umbrella} alt="Ícone" className="w-7 h-7" />
