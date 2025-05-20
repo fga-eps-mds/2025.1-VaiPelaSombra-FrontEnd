@@ -1,5 +1,3 @@
-import NavigateButton from "../components/NavigateButton"
-import { useAppContext } from "../context/AppContext"
 import Navbar from "../components/NavBar.tsx";
 import TravelPlanCard from "../components/TravelPlanCard";
 import "./Plano-Viagens.css"; // Crie este arquivo para os estilos da página
