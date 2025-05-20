@@ -1,6 +1,7 @@
 import NavigateButton from "../components/NavigateButton"
 import { useAppContext } from "../context/AppContext"
 
+
 function Home() {
   const { theme, setTheme } = useAppContext()
 
@@ -16,6 +17,7 @@ function Home() {
       </button>
 
       <NavigateButton to="/example-page" label="Ir para a página Example" />
+      <NavigateButton to="/Plano-Viagens" label="Ir para Plano de Viagens" />
     </div>
   )
 }
