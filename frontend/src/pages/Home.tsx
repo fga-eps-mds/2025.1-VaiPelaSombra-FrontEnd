@@ -1,6 +1,7 @@
 import NavigateButton from "../components/NavigateButton"
 import { useAppContext } from "../context/AppContext"
 
+
 function Home() {
   const { theme, setTheme } = useAppContext()
 
