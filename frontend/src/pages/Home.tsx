@@ -17,6 +17,7 @@ function Home() {
       </button>
 
       <NavigateButton to="/example-page" label="Ir para a página Example" />
+      <NavigateButton to="/Plano-Viagens" label="Ir para Plano de Viagens" />
     </div>
   )
 }
