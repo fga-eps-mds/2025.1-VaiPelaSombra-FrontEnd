@@ -16,6 +16,7 @@ function ExamplePage() {
         <p>Tema atual: {theme}</p>
         <button onClick={toggleTheme}>Alternar Tema</button>
         <NavigateButton to="/home" label="Voltar para a Home" />
+        <NavigateButton to="/Plano-Viagens" label="Ir para Plano de Viagens" />
       </div>
     )
   }

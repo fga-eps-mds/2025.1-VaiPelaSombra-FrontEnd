@@ -1,0 +1,62 @@
+.plano-viagens-bg {
+  background: #f7f7f7;
+  min-height: 100vh;
+}
+
+.plano-viagens-container {
+  max-width: 1920px;
+  margin: 100px auto 0;
+  padding: 24px;
+}
+
+.plano-viagens-actions {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.btn-primary {
+  /* background: #2563eb; */
+	background: #2c3e50;
+  color: #fff;
+  border: 0;
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-outline {
+  background: #fff;
+  /* color: #2563eb;
+  border: 1px solid #2563eb; */
+	color: #2c3e50;
+	border: 1px solid #2c3e50;
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.plano-viagens-section-title {
+  margin-bottom: 16px;
+}
+
+.plano-viagens-cards {
+  display: flex;
+  flex-wrap: nowrap;         /* Não quebra linha */
+  overflow-x: auto;          /* Habilita scroll horizontal */
+  gap: 8px;                  /* Espaço entre os cards */
+  padding-bottom: 8px;       /* Espaço para a barra de rolagem */
+  scrollbar-width: thin;     /* Firefox */
+}
+
+/* Fallback para navegadores Webkit (Chrome, Edge, Opera, etc.) */
+.plano-viagens-cards::-webkit-scrollbar {
+  height: 8px;
+}
+
+.plano-viagens-cards::-webkit-scrollbar-thumb {
+  background: #e0e0e0;
+  border-radius: 4px;
+}
