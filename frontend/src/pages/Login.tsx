@@ -13,6 +13,7 @@ function Login() {
   const [passwordError, setPasswordError] = useState("");
   const [mostrarSenha, setMostrarSenha] = useState(false);
   const [apiError, setApiError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
 
@@ -22,21 +23,21 @@ function Login() {
     setPasswordError("");
 
     if (!email) {
-      setEmailError("Preencha o e-mail.");
+      setEmailError("Please enter your email.");
       valid = false;
     } else {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) {
-        setEmailError("Email inválido.");
+        setEmailError("Invalid email address.");
         valid = false;
       }
     }
 
     if (!password) {
-      setPasswordError("Preencha a senha.");
+      setPasswordError("Please enter your password.");
       valid = false;
     } else if (password.length < 6) {
-      setPasswordError("A senha deve ter pelo menos 6 caracteres.");
+      setPasswordError("Password must be at least 6 characters long.");
       valid = false;
     }
 
@@ -47,7 +48,7 @@ function Login() {
     const response = await fetch("http://localhost:3000/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, senha: password }),
+      body: JSON.stringify({ email, password }),
     });
 
     if (!response.ok) {
@@ -62,21 +63,25 @@ function Login() {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setApiError("");
+  e.preventDefault();
+  setApiError("");
 
-    if (!validarCampos()) return;
+  if (!validarCampos()) return;
 
-    try {
-      await autenticarUsuario();
-    } catch (err) {
-      if (err instanceof Error) {
-        setApiError(err.message);
-      } else {
-        setApiError("Erro ao fazer login.");
-      }
+  setLoading(true);
+
+  try {
+    await autenticarUsuario();
+  } catch (err) {
+    if (err instanceof Error) {
+      setApiError(err.message);
+    } else {
+      setApiError("Login failed.");
     }
-  };
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="h-screen w-full flex bg-white">
@@ -164,12 +169,19 @@ function Login() {
 
             {/* Botões */}
             <div className="w-full flex flex-col space-y-2 px-7 pt-3">
-              <button
-                type="submit"
-                className="py-3 bg-[#223A60] rounded-md text-white text-center font-medium hover:bg-[#2F4A80] transition"
-              >
-                Entrar
-              </button>
+              {/* Spinner do carregamento  */}
+              {loading ? (
+                <div className="flex justify-center items-center py-3">
+                  <div className="w-6 h-6 border-4 border-[#223A60] border-t-transparent rounded-full animate-spin"></div>
+                </div>
+              ) : (
+                <button
+                  type="submit"
+                  className="py-3 bg-[#223A60] rounded-md text-white text-center font-medium hover:bg-[#2F4A80] transition"
+                >
+                  Entrar
+                </button>
+              )}
             </div>
 
             <div className='w-full pt-4 flex justify-row gap-1 justify-center'>
