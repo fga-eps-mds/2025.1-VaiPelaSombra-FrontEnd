@@ -4,6 +4,7 @@ import ExamplePage from './pages/Example';
 import PlanoViagens from './pages/Plano-Viagens';
 import Signup from './pages/Signup';
 import Login from './pages/Login';
+import DestinationInfo from './pages/DestinationInfo';
 
 function AppRoutes() {
   return (
@@ -15,6 +16,7 @@ function AppRoutes() {
         <Route path="/planoViagem" element={<PlanoViagens />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
+        <Route path='/destination-info' element={<DestinationInfo/>} />
       </Routes>
     </Router>
   );
