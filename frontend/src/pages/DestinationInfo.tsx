@@ -122,12 +122,42 @@ export default function DestinationInfo() {
             </section>
             <section className="mt-5">
                 <div className="flex">
-                    <div className="w-1/2 bg-gray-300 h-100 mr-2 rounded-md"></div>
+                    <div className="w-1/2 bg-gray-300 h-100 mr-2 rounded-md">
+                        <img
+                            src={'/src/assets/images/Imagen_de_los_canales_concéntricos_en_Ámsterdam.webp'}
+                            alt="IMAGE1"
+                            className="w-full h-full object-cover rounded-md"
+                        />
+                    </div>
                     <div className="grid grid-cols-2 gap-4 w-1/2 bg-white h-100 ml-2">
-                        <div className="bg-gray-300 rounded-md"></div>
-                        <div className="bg-gray-300 rounded-md"></div>
-                        <div className="bg-gray-300 rounded-md"></div>
-                        <div className="bg-gray-300 rounded-md"></div>
+                        <div className="bg-gray-300 rounded-md h-full w-full overflow-hidden">
+                            <img
+                                src={'/src/assets/images/View_of_Empire_State_Building_from_Rockefeller_Center_New_York_City_dllu.webp'}
+                                alt="IMAGE1"
+                                className="w-full h-full object-cover rounded-md"
+                            />
+                        </div>
+                        <div className="bg-gray-300 rounded-md h-full w-full overflow-hidden">
+                            <img
+                                src={'/src/assets/images/hq720.jpg'}
+                                alt="IMAGE1"
+                                className="w-full h-full object-cover rounded-md"
+                            />
+                        </div>
+                        <div className="bg-gray-300 rounded-md h-full w-full overflow-hidden">
+                            <img
+                                src={'/src/assets/images/Paracas_National_Reserve._Ica,_Peru.webp'}
+                                alt="IMAGE1"
+                                className="w-full h-full object-cover rounded-md"
+                            />
+                        </div>
+                        <div className="bg-gray-300 rounded-md h-full w-full overflow-hidden">
+                            <img
+                                src={'/src/assets/images/La_Tour_Eiffel_vue_de_la_Tour_Saint-Jacques,_Paris_août_2014_(2).webp'}
+                                alt="IMAGE1"
+                                className="w-full h-full object-cover rounded-md"
+                            />
+                        </div>
                     </div>
                 </div>
             </section>
