@@ -37,6 +37,8 @@ const Navbar: React.FC = () => {
         <NavItemSeparator />
         <NavLink to="/promocoes" className={getNavLinkClass}>Promoções</NavLink>
         <NavItemSeparator />
+        <NavLink to="/perfil" className={getNavLinkClass}>Perfil</NavLink>
+        <NavItemSeparator />
         <NavLink to="/login" className={getNavLinkClass}>Login</NavLink>
       </nav>
 
