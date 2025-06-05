@@ -5,12 +5,14 @@ import PlanoViagens from './pages/Plano-Viagens';
 import Signup from './pages/Signup';
 import Login from './pages/Login';
 import DestinationInfo from './pages/DestinationInfo';
+import Profile from './pages/Profile'
 
 function AppRoutes() {
   return (
     <Router>
       <Routes>
         <Route path="/home" element={<Home />} />
+        <Route path="/profile" element={<Profile />} />
         <Route path="/" element={<Navigate to="/planoViagem" replace />} />
         <Route path="/example-page" element={<ExamplePage />} />
         <Route path="/planoViagem" element={<PlanoViagens />} />
