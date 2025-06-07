@@ -12,7 +12,7 @@ function AppRoutes() {
     <Router>
       <Routes>
         <Route path="/home" element={<Home />} />
-        <Route path="/profile" element={<Profile />} />
+        <Route path="/perfil" element={<Profile />} />
         <Route path="/" element={<Navigate to="/planoViagem" replace />} />
         <Route path="/example-page" element={<ExamplePage />} />
         <Route path="/planoViagem" element={<PlanoViagens />} />
