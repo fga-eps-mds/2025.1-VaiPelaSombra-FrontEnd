@@ -6,7 +6,7 @@ interface CardFormProps {
     title: string;
     description: string;
     hyperlinkText: string;
-    linkTo: string;
+    linkTo?: string;
     children: React.ReactNode;
 }
 
@@ -21,7 +21,7 @@ export default function CardForm({ title, description, hyperlinkText, linkTo, ch
             <CardContent>
                 {children}
             </CardContent>
-            <CardFooter className="flex flex-col">
+            <CardFooter className="flex flex-col mt-0">
                 <Button variant="link" className="w-full">
                     <Link to={`/${linkTo}`}>{hyperlinkText}</Link>
                 </Button>

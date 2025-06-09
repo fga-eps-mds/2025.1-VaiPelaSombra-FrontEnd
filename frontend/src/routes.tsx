@@ -5,6 +5,7 @@ import PlanoViagens from './pages/Plano-Viagens';
 import Signup from './pages/Signup';
 import Login from './pages/Login';
 import DestinationInfo from './pages/DestinationInfo';
+import RecoverPassword from './pages/RecoverPassword';
 
 function AppRoutes() {
   return (
@@ -17,6 +18,7 @@ function AppRoutes() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
         <Route path='/destination-info' element={<DestinationInfo/>} />
+        <Route path='/recover-password' element={<RecoverPassword/>} />
       </Routes>
     </Router>
   );
