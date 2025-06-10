@@ -11,7 +11,7 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const toEmail = searchParams.get('email'); // Obtém o email dos parâmetros
+    const toEmail = searchParams.get('email');
 
     if (!toEmail) {
       return NextResponse.json(
@@ -20,7 +20,6 @@ export async function GET(request: Request) {
       );
     }
 
-    // Faz uma requisição para buscar o user_id com base no email
     const userResponse = await fetch(
       `http://localhost:3000/users?email=${toEmail}`
     );
@@ -41,15 +40,13 @@ export async function GET(request: Request) {
       );
     }
 
-    // Gera o link com o user_id
     const userLink = `https://www.example.com/${userId}`;
 
-    // Envia o email com o link gerado
     await resend.emails.send({
       from: 'onboarding@resend.dev',
       to: toEmail,
       subject: 'Link de entrada',
-      react: AccessTokenEmail({ email: toEmail, link: userLink }), // Passa o link gerado
+      react: AccessTokenEmail({ email: toEmail, link: userLink }),
     });
 
     return NextResponse.json({

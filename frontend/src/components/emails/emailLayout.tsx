@@ -16,12 +16,10 @@ import {
 
 interface AccessTokenEmailProps {
   email: string;
-  link: string; // Adiciona o link como propriedade
+  link: string;
 }
 
-const baseUrl = process.env.VERCEL_URL
-  ? `https://${process.env.VERCEL_URL}`
-  : 'http://localhost:3000';
+const baseUrl = 'http://localhost:3000';
 
 export const AccessTokenEmail = ({
   link,
@@ -55,7 +53,7 @@ export const AccessTokenEmail = ({
 
 AccessTokenEmail.PreviewProps = {
   email: 'example@example.com',
-  link: '123', // Exemplo de link relativo
+  link: '123',
 } as AccessTokenEmailProps;
 
 export default AccessTokenEmail;

@@ -5,7 +5,7 @@ import {
     FormItem,
     FormLabel,
     FormMessage,
-} from "@/components/ui/form"
+} from "@/components/ui/form";
 import CardForm from "./CardForm";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,9 +16,7 @@ import { z } from "zod";
 import { toast } from "sonner";
 import { CircleCheckIcon } from "lucide-react";
 
-
 export default function RecoverPasswordForm() {
-
     const form = useForm({
         resolver: zodResolver(RecoverPasswordSchema),
         defaultValues: {
@@ -26,10 +24,29 @@ export default function RecoverPasswordForm() {
         },
     });
 
-    function onSubmit(data: z.infer<typeof RecoverPasswordSchema>) {
-        toast(JSON.stringify(data), {
-            icon: <CircleCheckIcon className="text-emerald-500 w-5 h-5" />,
-        });
+    async function onSubmit(data: z.infer<typeof RecoverPasswordSchema>) {
+        try {
+            const response = await fetch(`/api/emailRoute?email=${encodeURIComponent(data.email)}`, {
+                method: "GET",
+            });
+
+            if (response.ok) {
+                toast(`Email enviado com sucesso para ${data.email}`, {
+                    icon: <CircleCheckIcon className="text-emerald-500 w-5 h-5" />,
+                });
+            } else {
+                const error = await response.json();
+                toast(`Erro: ${error.error}`, {
+                    icon: <CircleCheckIcon className="text-red-500 w-5 h-5" />,
+                });
+            }
+        } catch (error) {
+            const errorMessage =
+                error instanceof Error ? error.message : "Erro inesperado ao enviar o email.";
+            toast(`Erro ao enviar email: ${errorMessage}`, {
+                icon: <CircleCheckIcon className="text-red-500 w-5 h-5" />,
+            });
+        }
     }
 
     return (
@@ -37,7 +54,8 @@ export default function RecoverPasswordForm() {
             title="Recupere a sua conta"
             description="Digite um email para recuperar"
             hyperlinkText="Voltar para tela de Login"
-            linkTo="login" >
+            linkTo="login"
+        >
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)}>
                     <div className="space-y-3">
@@ -58,10 +76,12 @@ export default function RecoverPasswordForm() {
                                 </FormItem>
                             )}
                         />
-                        <Button type="submit" className="w-full mt-2 cursor-pointer">Enviar Link</Button>
+                        <Button type="submit" className="w-full mt-2 cursor-pointer">
+                            Enviar Link
+                        </Button>
                     </div>
                 </form>
             </Form>
         </CardForm>
-    )
+    );
 }
