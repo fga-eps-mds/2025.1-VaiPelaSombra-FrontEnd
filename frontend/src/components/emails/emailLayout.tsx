@@ -15,7 +15,8 @@ import {
 } from '@react-email/components';
 
 interface AccessTokenEmailProps {
-  username?: string;//get com database por email, deve ser mandado o email para ca pela pagina principal
+  email: string;
+  link: string; // Adiciona o link como propriedade
 }
 
 const baseUrl = process.env.VERCEL_URL
@@ -23,43 +24,38 @@ const baseUrl = process.env.VERCEL_URL
   : 'http://localhost:3000';
 
 export const AccessTokenEmail = ({
-  username,
-}: AccessTokenEmailProps) => (
-  <Html>
-    <Head />
-    <Body style={main}>
-      <Preview>
-        Clicking the button will give you access to your profile, please change your password as soon as possible
-      </Preview>
-      <Container style={container}>
+  link,
+}: AccessTokenEmailProps) => {
+  const fullLink = link.startsWith('http') ? link : `${baseUrl}/${link}`;
 
-        <Text style={title}>
-          <strong>@{username}</strong>, a personal link was created.
-        </Text>
+  return (
+    <Html>
+      <Head />
+      <Body style={main}>
+        <Preview>
+          Clicking the button will give you access to your profile, please change your password as soon as possible
+        </Preview>
+        <Container style={container}>
+          <Section style={section}>
+            <Text style={text}>
+              Clicking the button will give you access to your profile, please change your password as soon as possible.
+            </Text>
 
-        <Section style={section}>
-          <Text style={text}>
-            Hey <strong>{username}</strong>!
-          </Text>
-          <Text style={text}>
-            Clicking the button will give you access to your profile, please change your password as soon as possible
-          </Text>
+            <Button style={button} href={fullLink}>
+              Click to Enter
+            </Button>
+          </Section>
 
-          <Button style={button} href={`${baseUrl}/profile`}>
-            Click to Enter
-          </Button>
-        </Section>
-
-        <Text style={footer}>
-          Vai pela Sombra
-        </Text>
-      </Container>
-    </Body>
-  </Html>
-);
+          <Text style={footer}>Vai pela Sombra</Text>
+        </Container>
+      </Body>
+    </Html>
+  );
+};
 
 AccessTokenEmail.PreviewProps = {
-  username: 'alanturing',
+  email: 'example@example.com',
+  link: '123', // Exemplo de link relativo
 } as AccessTokenEmailProps;
 
 export default AccessTokenEmail;
@@ -75,11 +71,6 @@ const container = {
   maxWidth: '480px',
   margin: '0 auto',
   padding: '20px 0 48px',
-};
-
-const title = {
-  fontSize: '24px',
-  lineHeight: 1.25,
 };
 
 const section = {
@@ -101,6 +92,7 @@ const button = {
   lineHeight: 1.5,
   borderRadius: '0.5em',
   padding: '12px 24px',
+  textDecoration: 'none',
 };
 
 const footer = {
