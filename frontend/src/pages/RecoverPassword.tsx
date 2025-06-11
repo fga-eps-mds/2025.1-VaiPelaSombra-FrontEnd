@@ -3,8 +3,9 @@ import { FullScreenLayout } from "@/components/layouts/FullScreenLayout";
 import { Toaster } from "sonner";
 import Imagem2 from "@/assets/imagem2.png";
 
-
 export default function RecoverPassword() {
+    console.log('Página de recuperação de senha acessada'); // Log ao entrar na página
+
     return (
         <FullScreenLayout className="relative z-0 justify-center items-center" >
             <div className={"absolute inset-0 bg-cover bg-center opacity-10 z-0"}
@@ -14,7 +15,6 @@ export default function RecoverPassword() {
                 <RecoverPasswordForm />
                 <Toaster />
             </div>
-
         </FullScreenLayout>
-    )
+    );
 }

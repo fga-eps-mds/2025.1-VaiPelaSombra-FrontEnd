@@ -25,22 +25,30 @@ export default function RecoverPasswordForm() {
     });
 
     async function onSubmit(data: z.infer<typeof RecoverPasswordSchema>) {
+        console.log('Função onSubmit chamada com os dados:', data); // Log de entrada na função
+
         try {
             const response = await fetch(`/api/emailRoute?email=${encodeURIComponent(data.email)}`, {
                 method: "GET",
             });
 
+            console.log('Resposta completa do backend:', response); // Log da resposta completa
+
             if (response.ok) {
+                const successMessage = await response.json();
+                console.log('Mensagem de sucesso:', successMessage); // Log da mensagem de sucesso
                 toast(`Email enviado com sucesso para ${data.email}`, {
                     icon: <CircleCheckIcon className="text-emerald-500 w-5 h-5" />,
                 });
             } else {
                 const error = await response.json();
+                console.error('Erro retornado pelo backend:', error); // Log do erro retornado
                 toast(`Erro: ${error.error}`, {
                     icon: <CircleCheckIcon className="text-red-500 w-5 h-5" />,
                 });
             }
         } catch (error) {
+            console.error('Erro inesperado ao enviar o email:', error); // Log de erro inesperado
             const errorMessage =
                 error instanceof Error ? error.message : "Erro inesperado ao enviar o email.";
             toast(`Erro ao enviar email: ${errorMessage}`, {
