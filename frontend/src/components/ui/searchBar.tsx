@@ -16,14 +16,14 @@ export default function SearchBar({ value, onChange }: SearchBarProps) {
           placeholder="Buscar destino..."
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="pl-10 pr-10 py-5 rounded-xl shadow-md bg-white text-lgfocus:outline-none focus:ring-2 transition-all duration-200 hover:shadow-lg"/>
+          className="pl-10 pr-10 py-5 rounded-xl shadow-md bg-white text-lg focus:outline-none focus:ring-2 transition-all duration-200 hover:shadow-lg"
+/>
 
         {value.trim() !== "" && (
-          <button
+         <button
             onClick={() => onChange("")}
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-            aria-label="Limpar busca"
-          >
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 w-8 h-8 flex items-center justify-center"
+            aria-label="Limpar busca">
             <X size={20} />
           </button>
         )}
