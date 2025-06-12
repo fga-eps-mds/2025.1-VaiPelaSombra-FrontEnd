@@ -3,7 +3,8 @@ import SearchBar from "../components/ui/searchBar.tsx";
 import { useEffect, useState } from "react";
 import Navbar from "../components/NavBar.tsx";
 import ImagemFundo from "../assets/ImagemFundo.jpg"
-import imagem4 from "../assets/imagem4.jpg";
+import axios from "axios";
+
 
 interface Destination {
   id: number;
@@ -13,26 +14,33 @@ interface Destination {
 
 export default function Home() {
   const [destinos, setDestinos] = useState<Destination[]>([]);
-  const [search, setSerach] = useState("");
+  const [search, setSearch] = useState("");
 
-  //mockado por enquanto
-  useEffect(() => {
-    async function fetchDestinos() {
-      setDestinos([
-        { id: 1, name: "Rio de Janeiro", imageUrl:imagem4 },
-        { id: 2, name: "Salvador", imageUrl:imagem4 },
-        { id: 3, name: "Recife", imageUrl:imagem4 },
-        { id: 4, name: "Sao Paulo", imageUrl:imagem4 },
-        { id: 5, name: "Goiais", imageUrl:imagem4 },
-        { id: 6, name: "Brasilia", imageUrl:imagem4 },
-      ]);
+
+  async function fetchDestinos(name?: string) {
+    try {
+      const response = await axios.get("http://localhost:3000/api/home/destinos", {
+        params: name ? { name } : {},
+      });
+      setDestinos(response.data);
+    } catch (error) {
+      console.error("Erro ao buscar destinos:", error);
     }
+  }
+
+
+  useEffect(() => {
     fetchDestinos();
   }, []);
 
-  const destinosFiltrados = destinos.filter((des: Destination) =>
-    des.name.toLowerCase().includes(search.toLowerCase())
-  );
+
+  useEffect(() => {
+    const delayDebounce = setTimeout(() => {
+      fetchDestinos(search);
+    }, 300); //espera 300ms sem o user para chamar a funcao
+
+    return () => clearTimeout(delayDebounce);
+  }, [search]);
 
   return (
     <>
@@ -48,22 +56,28 @@ export default function Home() {
               </h1>
             </div>
             <div className="mt-8">
-              <SearchBar value={search} onChange={setSerach}/>
+              <SearchBar value={search} onChange={setSearch}/>
             </div>
           </div>
         </div>
 
-        <div className=" w-full p-6 mt-1">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-            {destinosFiltrados.map((destino) => (
-              <DestinationCard
-                key={destino.id}
-                id={destino.id}
-                name={destino.name}
-                imageUrl={destino.imageUrl}
-              />
-            ))}
-          </div>
+        <div className="w-full p-6 mt-1">
+          {destinos.length === 0 && search.trim() !== "" ? (
+            <p className="text-center text-gray-500 text-lg font-semibold">
+              Nenhum destino encontrado para "{search}"
+            </p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+              {destinos.map((destino) => (
+                <DestinationCard
+                  key={destino.id}
+                  id={destino.id}
+                  name={destino.name}
+                  imageUrl={destino.imageUrl}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </>

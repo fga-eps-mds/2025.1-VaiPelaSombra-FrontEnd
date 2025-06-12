@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { MapPin } from "lucide-react";
 
 interface Destination {
   id: number;
@@ -11,11 +12,21 @@ export default function DestinationCard({ id, name, imageUrl }: Destination) {
 
   return (
     <div
-      onClick={() => navigate(`/galeria/${id}`)}
-      className="cursor-pointer rounded-2xl shadow-md overflow-hidden hover:shadow-lg transition transform hover:scale-105"
+      onClick={() => navigate(`/inf-destino/${id}`)}
+      className="cursor-pointer rounded-2xl shadow-md bg-white overflow-hidden transition transform hover:scale-105 md:hover:shadow-lg md:hover:scale-[1.03]"
     >
-      <img src={imageUrl} alt={name} className="w-full h-40 object-cover" />
-      <div className="p-4 text-center text-xl font-medium">{name}</div>
+      <img
+        src={imageUrl}
+        alt={name}
+        className="w-full h-44 object-cover"
+      />
+
+      <div className="p-4 flex items-center justify-center gap-2">
+        <MapPin className="text-[#223A60] w-5 h-5" />
+        <span className="text-lg font-semibold text-[#223A60] leading-none">
+          {name}
+        </span>
+      </div>
     </div>
   );
 }
