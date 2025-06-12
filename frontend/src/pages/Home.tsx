@@ -9,7 +9,7 @@ import axios from "axios";
 interface Destination {
   id: number;
   name: string;
-  imageUrl: string;
+  mainImageUrl: string;
 }
 
 export default function Home() {
@@ -19,7 +19,7 @@ export default function Home() {
 
   async function fetchDestinos(name?: string) {
     try {
-      const response = await axios.get("http://localhost:3000/api/home/destinos", {
+      const response = await axios.get("http://localhost:3000/destinations", {
         params: name ? { name } : {},
       });
       setDestinos(response.data);
@@ -37,7 +37,7 @@ export default function Home() {
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
       fetchDestinos(search);
-    }, 300); //espera 300ms sem o user para chamar a funcao
+    }, 300); //espera 300ms sem o user digitar para chamar a funcao
 
     return () => clearTimeout(delayDebounce);
   }, [search]);
@@ -73,7 +73,7 @@ export default function Home() {
                   key={destino.id}
                   id={destino.id}
                   name={destino.name}
-                  imageUrl={destino.imageUrl}
+                  imageUrl={destino.mainImageUrl}
                 />
               ))}
             </div>
