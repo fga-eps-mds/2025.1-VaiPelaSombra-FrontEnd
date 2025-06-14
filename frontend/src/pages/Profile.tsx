@@ -2,8 +2,7 @@ import { useState } from "react";
 import ProfileCard from "../components/ui/profilecard";
 import ProfileForm  from "../components/ui/profileform";
 import userAvatar from "../assets/images/Paco-PatoAventuras2017.webp"; 
-import backgroundImage from "../assets/estilo.png";
-
+import Navbar from "../components/NavBar.tsx";
 type Profile = {
   name: string;
   email: string;
@@ -16,7 +15,7 @@ const Profile = () => {
     name: "Maria Silva",
     email: "maria@exemplo.com",
     preferencias: ["Praia", "Clima quente", "Viagens rápidas"],
-    avatar: userAvatar,  // <-- sem aspas, usa a variável
+    avatar: userAvatar,  
   });
 
   const [editMode, setEditMode] = useState(false);
@@ -43,10 +42,11 @@ const Profile = () => {
   return (
     <div
       className="min-h-screen bg-cover bg-center flex items-center justify-center"
-      style={{ backgroundImage: `url(${backgroundImage})` }}
+      style={{ background: '#223A60' }} 
     >
+      <Navbar />
       <div className="bg-white bg-opacity-90 p-6 rounded-lg shadow-lg max-w-3xl w-full">
-        <h1 className="text-4xl font-semibold mb-4 text-center text-[#223A60]">Perfil</h1>
+        <h1 className="text-4xl font-semibold mb-1 text-center text-[#223A60]">Perfil</h1>
 
         {editMode ? (
           <ProfileForm
