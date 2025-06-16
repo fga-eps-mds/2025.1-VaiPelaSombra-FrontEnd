@@ -2,7 +2,7 @@ import DestinationCard from "../components/ui/destinationCard.tsx";
 import SearchBar from "../components/ui/searchBar.tsx";
 import { useEffect, useState } from "react";
 import Navbar from "../components/NavBar.tsx";
-import ImagemFundo from "../assets/ImagemFundo.jpg"
+import ImagemFundo3 from "../assets/ImagemFundo3.jpeg"
 import axios from "axios";
 
 
@@ -19,9 +19,11 @@ export default function Home() {
 
   async function fetchDestinos(name?: string) {
     try {
-      const response = await axios.get("http://localhost:3000/destinations", {
-        params: name ? { name } : {},
-      });
+      const response = await axios.get("http://localhost:3000/destinations",
+        {
+        params: name ? { search: name } : {},
+        }
+      );
       setDestinos(response.data);
     } catch (error) {
       console.error("Erro ao buscar destinos:", error);
@@ -47,8 +49,8 @@ export default function Home() {
       <Navbar />
 
       <div className="min-h-screen w-full flex flex-col bg-white">
-        <div className="h-[400px] w-full flex flex-col p-6 mt-4 bg-cover bg-no-repeat bg-center justify-center items-center leading-snug" style={{ backgroundImage: `url(${ImagemFundo})`}}>
-          <div>
+        <div className="h-[385px] w-full flex flex-col p-6 mt-4 mb-3 bg-cover bg-no-repeat bg-center justify-center items-center" style={{ backgroundImage: `url(${ImagemFundo3})`}}>
+          <div className="">
             <div className="text-center mt-19">
               <h1 className="text-4xl font-bold drop-shadow text-[#223A60] justify-center">
               Embarque Já na sua Jornada para <br/ >
@@ -64,7 +66,7 @@ export default function Home() {
         <div className="w-full p-6 mt-1">
           {destinos.length === 0 && search.trim() !== "" ? (
             <p className="text-center text-gray-500 text-lg font-semibold">
-              Nenhum destino encontrado para "{search}"
+              Nenhum destino encontrado para "{search}."
             </p>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
