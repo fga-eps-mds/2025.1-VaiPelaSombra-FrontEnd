@@ -2,12 +2,14 @@ import React from "react";
 type ProfileCardProps = {
   name: string;
   email: string;
-  preferencias: string[];
+  travelerType: string;
+  travelFrequency: string;
+  averageBudget: string;
   avatar?: string;
   onEdit: () => void;
 };
 
-const ProfileCard: React.FC<ProfileCardProps> = ({ name, email, preferencias, avatar, onEdit }) => {
+const ProfileCard: React.FC<ProfileCardProps> = ({ name, email, travelerType, travelFrequency, averageBudget, avatar, onEdit }) => {
  return (
     <div>
       <div className="flex flex-col space-y-6 px-7 py-6 bg-white rounded-lg shadow-md mt-5" >
@@ -19,13 +21,16 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ name, email, preferencias, av
               className="w-32 h-32 rounded-full object-cover border-3 border-black mt-5"
             />
           ) : (
-            <div className="w-32 h-32 rounded-full bg-gray-200 border-2 border-black" />
+            <div className="w-32 h-32 rounded-full bg-white-200 border-2 border-black" />
           )}
         </div>
         <div className="space-y-4 text-m mt-7">
           <p><strong>Nome:</strong> {name}</p>
           <p><strong>E-mail:</strong> {email}</p>
-          <p><strong>Preferências:</strong> {preferencias.join(", ")}</p>
+
+          <p><strong>Estilo do Viajante:</strong> {travelerType}</p>
+          <p><strong>Frequência de Viagem:</strong> {travelFrequency}</p>
+          <p><strong>Renda:</strong> {averageBudget}</p>
         </div>
         <button
           type="button"
