@@ -8,7 +8,7 @@ import axios from "axios";
 
 interface Destination {
   id: number;
-  name: string;
+  title: string;
   mainImageUrl: string;
 }
 
@@ -17,11 +17,11 @@ export default function Home() {
   const [search, setSearch] = useState("");
 
 
-  async function fetchDestinos(name?: string) {
+  async function fetchDestinos(title?: string) {
     try {
-      const response = await axios.get("http://localhost:3000/destinations",
+      const response = await axios.get("http://localhost:3000/home",
         {
-        params: name ? { search: name } : {},
+        params: title ? { search: title } : {},
         }
       );
       setDestinos(response.data);
@@ -74,7 +74,7 @@ export default function Home() {
                 <DestinationCard
                   key={destino.id}
                   id={destino.id}
-                  name={destino.name}
+                  title={destino.title}
                   imageUrl={destino.mainImageUrl}
                 />
               ))}
