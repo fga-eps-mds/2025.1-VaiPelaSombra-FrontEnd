@@ -8,7 +8,7 @@ interface Destination {
   imageUrl: string | null;
 }
 
-export default function DestinationCard({ title, imageUrl}: Destination) {
+export default function DestinationCard({ title, imageUrl, id}: Destination) {
   const navigate = useNavigate();
   const API_BASE_URL = 'http://localhost:3000';
   const fullImageUrl = imageUrl
@@ -17,7 +17,7 @@ export default function DestinationCard({ title, imageUrl}: Destination) {
 
   return (
     <div
-      onClick={() => navigate(`/inf-destino/${name}`)}
+      onClick={() => navigate(`/inf-destino/${id}`)}
       className="cursor-pointer rounded-2xl shadow-md bg-white overflow-hidden transition transform hover:scale-105 md:hover:shadow-lg md:hover:scale-[1.03]"
     >
       <img
