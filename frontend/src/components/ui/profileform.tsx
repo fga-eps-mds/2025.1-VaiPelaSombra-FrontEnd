@@ -1,10 +1,13 @@
 import React, { useState } from "react";
-
+import defaultavatar from '../../assets/images/defaultavatar.png';
+ 
 type Profile = {
   name: string;
   email: string;
-  preferencias: string[];
   avatar?: string; 
+  travelerType: string;
+  travelFrequency: string;
+  averageBudget: string;
 };
 
 type ProfileFormProps = {
@@ -20,13 +23,13 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ profile, onSave, onCancel }) 
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    if (name === "preferencias") {
-      setFormData({ ...formData, preferencias: value.split(",").map(p => p.trim()) });
-    } else {
-      setFormData({ ...formData, [name]: value });
-    }
-  };
+  const { name, value } = e.target;
+  setFormData((prev) => ({
+    ...prev,
+    [name]: value,
+  }));
+ };
+
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -47,13 +50,11 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ profile, onSave, onCancel }) 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col space-y-4 px-7 py-6 bg-white rounded-lg shadow-md">
       <div className="flex flex-col items-center space-y-2">
-        {formData.avatar && (
-          <img
-            src={formData.avatar}
-            alt="Avatar Preview"
-            className="w-24 h-24 rounded-full object-cover border-2 border-black"
-          />
-        )}
+       <img
+           src={formData.avatar && formData.avatar.trim() !== "" ? formData.avatar : defaultavatar}
+           alt="Avatar Preview"
+          className="w-24 h-24 rounded-full object-cover border-2 border-black"
+            />
         <input
           id="avatar"
           type="file"
@@ -87,11 +88,31 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ profile, onSave, onCancel }) 
       </div>
 
       <div>
-        <label htmlFor="preferencias" className="block text-sm font-medium">Preferências (vírgula)</label>
+        <label htmlFor="travelerType" className="block text-sm font-medium">Estilo do Viajante:</label>
         <input
-          id="preferencias"
-          name="preferencias"
-          value={formData.preferencias.join(", ")}
+          id="travelerType"
+          name="travelerType"
+          value={formData.travelerType}
+          onChange={handleChange}
+          className="mt-1 w-full border border-gray-300 rounded-md px-2 py-1"
+        />
+      </div>
+      <div>
+        <label htmlFor="travelFrequency" className="block text-sm font-medium">Frequência de Viagem:</label>
+        <input
+          id="travelFrequency"
+          name="travelFrequency"
+          value={formData.travelFrequency}
+          onChange={handleChange}
+          className="mt-1 w-full border border-gray-300 rounded-md px-2 py-1"
+        />
+      </div>
+      <div>
+        <label htmlFor="averageBudget" className="block text-sm font-medium">Renda:</label>
+        <input
+          id="averageBudget"
+          name="averageBudget"
+          value={formData.averageBudget}
           onChange={handleChange}
           className="mt-1 w-full border border-gray-300 rounded-md px-2 py-1"
         />
