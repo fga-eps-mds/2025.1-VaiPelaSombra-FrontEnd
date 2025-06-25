@@ -49,9 +49,10 @@ const Profile = () => {
           avatar: data.profileImage || defaultavatar,
         });
         setErrorMessage("");
-      } catch (err: any) { 
-        console.error("Erro ao carregar dados do usuário:", err);
-        setErrorMessage("Não foi possível carregar o perfil.");
+      } catch (err: unknown) {
+      const error = err as Error;
+      console.error("Erro ao carregar dados do usuário:", error);
+      setErrorMessage("Não foi possível carregar o perfil.");
       }
 
     };
@@ -113,11 +114,13 @@ const Profile = () => {
       setSuccessMessage("Perfil atualizado com sucesso!");
       setErrorMessage(""); 
       setTimeout(() => setSuccessMessage(""), 3000);
-    } catch (err: any) { 
-      console.error("Erro ao salvar perfil:", err);
-      setErrorMessage("Erro ao atualizar perfil. " + (err.message || "Tente novamente."));
+    }catch (err: unknown) {
+       const error = err as Error;
+       console.error("Erro ao salvar perfil:", error);
+      setErrorMessage("Erro ao atualizar perfil. " + (error.message || "Tente novamente."));
       setSuccessMessage("");
-    }
+      }
+
   };
 
 
