@@ -9,7 +9,7 @@ import axios from "axios";
 interface Destination {
   id: number;
   title: string;
-  mainImageUrl: string;
+  imageUrl: string;
 }
 
 export default function Home() {
@@ -39,7 +39,7 @@ export default function Home() {
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
       fetchDestinos(search);
-    }, 300); //espera 300ms sem o user digitar para chamar a funcao
+    }, 300);
 
     return () => clearTimeout(delayDebounce);
   }, [search]);
@@ -66,16 +66,16 @@ export default function Home() {
         <div className="w-full p-6 mt-1">
           {destinos.length === 0 && search.trim() !== "" ? (
             <p className="text-center text-gray-500 text-lg font-semibold">
-              Nenhum destino encontrado para "{search}."
+              Nenhum destino encontrado para "{search}".
             </p>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-7.5">
               {destinos.map((destino) => (
                 <DestinationCard
                   key={destino.id}
                   id={destino.id}
                   title={destino.title}
-                  imageUrl={destino.mainImageUrl}
+                  imageUrl={destino.imageUrl}
                 />
               ))}
             </div>
