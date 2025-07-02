@@ -8,7 +8,7 @@ interface Destination {
   imageUrl: string | null;
 }
 
-export default function DestinationCard({ title, imageUrl, id}: Destination) {
+export default function DestinationCard({ title, imageUrl, id }: Destination) {
   const navigate = useNavigate();
   const API_BASE_URL = 'http://localhost:3000';
   const fullImageUrl = imageUrl
