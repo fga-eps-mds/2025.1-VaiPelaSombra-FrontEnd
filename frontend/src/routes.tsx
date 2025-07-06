@@ -7,6 +7,7 @@ import Login from './pages/Login';
 import DestinationInfo from './pages/DestinationInfo';
 import RecoverPassword from "@/pages/RecoverPassword";
 import Profile from './pages/Profile'
+import ResumoViagem from './pages/ResumoViagem';
 
 function AppRoutes() {
   return (
@@ -21,6 +22,7 @@ function AppRoutes() {
         <Route path="/login" element={<Login />} />
         <Route path='/destination-info' element={<DestinationInfo/>} />
         <Route path="/recover-password" element={<RecoverPassword />} />
+        <Route path='/resumo-viagem' element={<ResumoViagem />} />
       </Routes>
     </Router>
   );
