@@ -37,7 +37,7 @@ export function SideBar({ onScrollToSection }: SideBarProps) {
                         </div>
                     </AccordionTrigger>
                     <AccordionContent>
-                        <Button variant={"ghost"} className="cursor-pointer text-base text-gray-700 py-5">
+                        <Button variant={"ghost"} className="cursor-pointer text-base text-gray-700 py-5"  onClick={() => onScrollToSection("qua")}>
                             <Route></Route>
                             Qua 2/7
                         </Button>

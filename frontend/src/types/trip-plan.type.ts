@@ -2,11 +2,11 @@ export interface TripPlan {
     id: number,
     name: string
     image: string
-    createdBy: number
+    ownerId: number
     notes: string
     startDate: string
     endDate: string
     status: string
     daysLeft: number
-    destination: number
+    destinationId: number
 }
