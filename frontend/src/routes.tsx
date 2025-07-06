@@ -5,7 +5,7 @@ import PlanoViagens from './pages/Plano-Viagens';
 import Signup from './pages/Signup';
 import Login from './pages/Login';
 import DestinationInfo from './pages/DestinationInfo';
-
+import CreateItineraryPage from './pages/itinerario';
 function AppRoutes() {
   return (
     <Router>
@@ -17,6 +17,7 @@ function AppRoutes() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
         <Route path='/destination-info' element={<DestinationInfo/>} />
+        <Route path="/criar-plano" element={<CreateItineraryPage />} />
       </Routes>
     </Router>
   );
