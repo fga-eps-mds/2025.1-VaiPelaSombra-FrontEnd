@@ -6,6 +6,7 @@ import Signup from './pages/Signup';
 import Login from './pages/Login';
 import DestinationInfo from './pages/DestinationInfo';
 import Profile from './pages/Profile'
+import ResumoViagem from './pages/ResumoViagem';
 
 function AppRoutes() {
   return (
@@ -19,6 +20,7 @@ function AppRoutes() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
         <Route path='/destination-info' element={<DestinationInfo/>} />
+        <Route path='/resumo-viagem' element={<ResumoViagem />} />
       </Routes>
     </Router>
   );
