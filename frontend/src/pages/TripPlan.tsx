@@ -28,6 +28,7 @@ import { SideBar } from "@/components/SideBar";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import type { TripPlan } from "@/types/trip-plan.type";
+import { DeleteDialog } from "@/components/DeleteDialog"
 
 
 export default function TripPlan() {
@@ -64,24 +65,13 @@ export default function TripPlan() {
     return (
         <div className="flex h-screen">
 
-            <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-                <DialogContent className="w-100">
-                    <DialogHeader>
-                        <DialogTitle>Tem certeza que deseja deletar?</DialogTitle>
-                        <DialogDescription>
-                            Tenha em mente que uma vez deletado, essa acao nao pode ser desfeita.
-                        </DialogDescription>
-                    </DialogHeader>
-                    <DialogFooter>
-                        <DialogClose asChild>
-                            <Button variant={"outline"}>Cancelar</Button>
-                        </DialogClose>
-                        <DialogClose>
-                            <Button variant={"destructive"} onClick={() => console.log("teste")}>Deletar</Button>
-                        </DialogClose>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+            <DeleteDialog 
+                open={isDeleteDialogOpen}
+                onOpenChange={setIsDeleteDialogOpen}
+                onConfirm={() => console.log("teste")}
+                title="Tem certeza que deseja deletar o plano de viagem?"
+                description="Tenha em mente que uma vez deletado, essa acao nao pode ser desfeita."
+            />
 
             <SideBar onScrollToSection={scrollToSection}></SideBar>
 
@@ -110,7 +100,7 @@ export default function TripPlan() {
                                     <ImageUpIcon size={16} className="opacity-60" aria-hidden="true" />
                                     <span>Mudar imagem</span>
                                 </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => console.log("teste")}>
+                                <DropdownMenuItem onClick={() => setIsDeleteDialogOpen(true)}>
                                     <Share2Icon size={16} className="opacity-60" aria-hidden="true" />
                                     <span>Convidar amigos</span>
                                 </DropdownMenuItem>
