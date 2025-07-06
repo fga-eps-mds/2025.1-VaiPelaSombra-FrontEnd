@@ -8,7 +8,7 @@ interface SideBarProps {
 
 export function SideBar({ onScrollToSection }: SideBarProps) {
     return (
-        <aside className="h-full w-50 border-r border-gray-300 bg-gray-50 p-4 overflow-y-auto">
+        <aside className="h-full w-50 border-r no-scrollbar border-gray-300 bg-gray-50 p-4 overflow-y-auto">
             <Accordion type="multiple" defaultValue={["visaoGeral", "itinerario"]}>
                 <AccordionItem value="visaoGeral" className="border-b-0">
                     <AccordionTrigger className="flex hover:no-underline justify-center items-center cursor-pointer">

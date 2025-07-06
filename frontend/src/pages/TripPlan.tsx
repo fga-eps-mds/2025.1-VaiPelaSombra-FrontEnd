@@ -35,7 +35,7 @@ export default function TripPlan() {
         <div className="flex h-screen">
             <SideBar onScrollToSection={scrollToSection}></SideBar>
 
-            <main className="flex-col w-180 bg-white overflow-y-auto shadow-[10px_0px_15px_-3px_rgba(0,0,0,0.1)] z-10">
+            <main className="flex-col w-180 bg-white overflow-y-auto no-scrollbar shadow-[10px_0px_15px_-3px_rgba(0,0,0,0.1)] z-10">
                 <div className="h-50 bg-amber-700">
                     <img
                         src={'/src/assets/images/hq720.jpg'}
