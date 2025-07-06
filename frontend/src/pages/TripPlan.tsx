@@ -6,6 +6,7 @@ import {
     AccordionItem,
     AccordionTrigger,
 } from "@/components/ui/accordion"
+import { Textarea } from "@/components/ui/textarea"
 import { act, useState } from "react";
 import { SideBar } from "@/components/SideBar";
 import { Separator } from "@/components/ui/separator";
@@ -95,8 +96,8 @@ export default function TripPlan() {
                                         <h3 className="text-2xl font-bold tracking-tight font-mono">Notas</h3>
                                     </div>
                                 </AccordionTrigger>
-                                <AccordionContent className="ps-3">
-                                    <span>Alguma coisa</span>
+                                <AccordionContent>
+                                    <Textarea placeholder="Escreva suas anotacoes de viagem aqui" className="w-150 p-5 m-1"></Textarea>
                                 </AccordionContent>
                             </AccordionItem>
                         </Accordion>
