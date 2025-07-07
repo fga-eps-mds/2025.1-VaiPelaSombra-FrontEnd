@@ -93,9 +93,49 @@ const PlanoViagens: React.FC = () => {
     fetchTravelPlans();
   }, [fetchTravelPlans]);
 
-  const handleConfirmLink = async () => {
-  };
+ const handleConfirmLink = async () => {
+  const token = getAuthToken();
+  const userId = localStorage.getItem("userId");
 
+  if (!token || !userId) {
+    setError("Autenticação necessária. Por favor, faça login novamente.");
+    return;
+  }
+
+  try {
+    const match = linkInput.match(/(\d+)$/); 
+    const itineraryId = match ? match[1] : null;
+
+    if (!itineraryId) {
+      setError("Link inválido. Certifique-se de colar o link correto.");
+      return;
+    }
+
+    const response = await fetch(
+      `http://localhost:3000/itineraries/${itineraryId}/users/${userId}`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.message || "Falha ao entrar no plano de viagem.");
+    }
+
+    alert("Você entrou com sucesso no plano de viagem!");
+    setShowModal(false);
+    setLinkInput("");
+    fetchTravelPlans(); 
+
+  } catch (err) {
+    setError(err instanceof Error ? err.message : "Ocorreu um erro.");
+    console.error("Erro ao entrar com link:", err);
+  }
+};
   return (
     <div className="plano-viagens-bg">
       <Navbar />
