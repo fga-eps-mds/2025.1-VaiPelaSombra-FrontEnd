@@ -185,3 +185,23 @@
   background-color: #b9d0e7;
   cursor: not-allowed;
 }
+.travel-plan-edit-button {
+  margin-top: 2rem;
+  padding: 0.5rem 1rem;
+  background-color: #223a60;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.2s ease;
+}
+
+.travel-plan-edit-button:hover {
+  background-color: #1a2f50;
+}
+.travel-plan-users-names {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  color: #555;
+}
