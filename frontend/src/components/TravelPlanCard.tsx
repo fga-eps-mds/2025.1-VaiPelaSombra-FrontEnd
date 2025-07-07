@@ -7,7 +7,6 @@ interface User {
 }
 
 interface TravelPlanCardProps {
-  image: string;
   title: string;
   users: User[];
   date: string;
@@ -16,7 +15,6 @@ interface TravelPlanCardProps {
 }
 
 const TravelPlanCard: React.FC<TravelPlanCardProps> = ({
-  image,
   title,
   users,
   date,
@@ -24,7 +22,6 @@ const TravelPlanCard: React.FC<TravelPlanCardProps> = ({
   faded = false,
 }) => (
   <div className={`travel-plan-card${faded ? " faded" : ""}`}>
-    <img src={image} alt={title} className="travel-plan-image" />
     <div className="travel-plan-content">
       <div className="travel-plan-title">{title}</div>
       <div className="travel-plan-users">
