@@ -6,6 +6,7 @@ import Signup from './pages/Signup';
 import Login from './pages/Login';
 import DestinationInfo from './pages/DestinationInfo';
 import CreateItineraryPage from './pages/itinerario';
+import EditarItinerario from './pages/editaritinerario';
 function AppRoutes() {
   return (
     <Router>
@@ -18,6 +19,7 @@ function AppRoutes() {
         <Route path="/login" element={<Login />} />
         <Route path='/destination-info' element={<DestinationInfo/>} />
         <Route path="/criar-plano" element={<CreateItineraryPage />} />
+        <Route path="/editar-plano/:itineraryId" element={<EditarItinerario />} />
       </Routes>
     </Router>
   );
