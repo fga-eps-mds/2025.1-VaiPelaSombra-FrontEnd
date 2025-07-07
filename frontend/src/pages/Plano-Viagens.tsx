@@ -5,15 +5,22 @@ import Modal from "../components/ui/modal";
 import "./Plano-Viagens.css";
 import NavigateButton from "../components/NavigateButton";
 
+type User = {
+  id: number;
+  name: string;
+};
+
 type ApiItinerary = {
   id: number;
   title: string;
   startDate: string;
+  users: User[];
 };
 
 type TravelPlan = {
+  id: number;
   title: string;
-  users: []; 
+  users: User[];
   date: string;
   daysLeft: number;
   faded?: boolean;
@@ -62,20 +69,20 @@ const PlanoViagens: React.FC = () => {
           history.push(plan);
         }
       });
-
       const formatPlan = (plan: ApiItinerary, faded = false): TravelPlan => ({
-        title: plan.title,
-        users: [], 
-        date: new Date(plan.startDate).toLocaleDateString("pt-BR"),
-        daysLeft: Math.max(
+        id: plan.id,
+       title: plan.title,
+       users: plan.users || [],
+       date: new Date(plan.startDate).toLocaleDateString("pt-BR"),
+       daysLeft: Math.max(
           0,
           Math.ceil(
-            (new Date(plan.startDate).getTime() - now.getTime()) /
-              (1000 * 60 * 60 * 24)
-          )
-        ),
-        faded,
-      });
+      (new Date(plan.startDate).getTime() - now.getTime()) /
+        (1000 * 60 * 60 * 24)
+    )
+  ),
+  faded,
+});
 
       setTravelPlans(upcoming.map((p) => formatPlan(p)));
       setTravelHistory(history.map((p) => formatPlan(p, true)));
@@ -152,27 +159,27 @@ const PlanoViagens: React.FC = () => {
           </button>
         </div>
 
-        {isLoading && <p>Carregando seus planos...</p>}
+        {isLoading && <p>Carregando planos</p>}
         {error && <p style={{ color: "red" }}>{error}</p>}
 
         {!isLoading && !error && (
           <>
             <h2 className="plano-viagens-section-title">Seus planos de viagens</h2>
-            <div className="plano-viagens-cards">
-              {travelPlans.length > 0 ? (
-                travelPlans.map((plan, idx) => (
-                  <TravelPlanCard key={idx} {...plan} />
-                ))
-              ) : (
-                <p>Você não tem nenhuma viagem planejada.</p>
-              )}
-            </div>
+           <div className="plano-viagens-cards">
+             {travelPlans.length > 0 ? (
+            travelPlans.map((plan, idx) => (
+            <TravelPlanCard key={idx} {...plan} itineraryId={plan.id} />
+           ))
+           ) : (
+    <p>Você não tem nenhuma viagem planejada.</p>
+  )}
+</div>
 
             <h2 className="plano-viagens-section-title">Histórico de planos de viagens</h2>
             <div className="plano-viagens-cards">
               {travelHistory.length > 0 ? (
                 travelHistory.map((plan, idx) => (
-                  <TravelPlanCard key={idx} {...plan} />
+               <TravelPlanCard key={idx} {...plan} itineraryId={plan.id} />
                 ))
               ) : (
                 <p>Nenhuma viagem no seu histórico ainda.</p>
