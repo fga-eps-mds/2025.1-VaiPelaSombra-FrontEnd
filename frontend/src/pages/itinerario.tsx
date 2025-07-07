@@ -78,15 +78,13 @@ const CreateItineraryPage: React.FC = () => {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(payload),
       });
-
-      if (!response.ok) {
+    if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || "Falha ao criar o plano de viagem.");
-      }
-
-      const newItinerary = await response.json();
-      alert("Plano de viagem criado com sucesso!");
-      navigate(`/plano-viagem/${newItinerary.id}`);
+    }
+    await response.json(); 
+    alert("Plano de viagem criado com sucesso!");
+    navigate('/planoViagem');
 
     } catch (err) {
       setError(err instanceof Error ? err.message : "Ocorreu um erro.");
