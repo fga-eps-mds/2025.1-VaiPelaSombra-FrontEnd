@@ -5,10 +5,10 @@ import PlanoViagens from './pages/Plano-Viagens';
 import Signup from './pages/Signup';
 import Login from './pages/Login';
 import DestinationInfo from './pages/DestinationInfo';
-import Profile from './pages/Profile'
-
 import CreateItineraryPage from './pages/itinerario';
 import EditarItinerario from './pages/EditarItinerario';
+import Profile from './pages/Profile';
+
 function AppRoutes() {
   return (
     <Router>
