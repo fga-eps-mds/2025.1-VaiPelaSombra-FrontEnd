@@ -7,6 +7,8 @@ import Login from './pages/Login';
 import DestinationInfo from './pages/DestinationInfo';
 import CreateItineraryPage from './pages/itinerario';
 import EditarItinerario from './pages/EditarItinerario';
+import Profile from './pages/Profile';
+
 function AppRoutes() {
   return (
     <Router>
@@ -17,9 +19,10 @@ function AppRoutes() {
         <Route path="/plano-viagens" element={<PlanoViagens />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
-        <Route path='/destination-info' element={<DestinationInfo/>} />
+        <Route path="/destination-info" element={<DestinationInfo />} />
         <Route path="/criar-plano" element={<CreateItineraryPage />} />
         <Route path="/editar-plano/:itineraryId" element={<EditarItinerario />} />
+        <Route path="/perfil" element={<Profile />} />
       </Routes>
     </Router>
   );

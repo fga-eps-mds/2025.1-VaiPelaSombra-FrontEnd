@@ -1,12 +1,25 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import './Navbar.css';
 import logoIcon from '../assets/images/logoIcon.png';
-import userAvatar from '../assets/images/GoombaExample.jpeg';
-
+import defaultavatar from '../assets/images/defaultavatar.png';
 const NavItemSeparator: React.FC = () => <span className="nav-item-separator">|</span>;
 
-const Navbar: React.FC = () => {
+const Navbar: React.FC = () => 
+  {  const [userAvatar, setUserAvatar] = useState<string | null>(null);
+
+  useEffect(() => {
+
+    const loadAvatar = () => {
+      const savedAvatar = localStorage.getItem("userAvatar");
+      setUserAvatar(savedAvatar);
+    };
+    loadAvatar();
+    window.addEventListener("avatarUpdated", loadAvatar);
+    return () => {
+      window.removeEventListener("avatarUpdated", loadAvatar);
+    };
+  }, []);
   const getNavLinkClass = ({ isActive }: { isActive: boolean }): string => {
     return isActive ? "nav-item active" : "nav-item";
   };
@@ -37,17 +50,12 @@ const Navbar: React.FC = () => {
         <NavItemSeparator />
         <NavLink to="/promocoes" className={getNavLinkClass}>Promoções</NavLink>
         <NavItemSeparator />
+     
         <NavLink to="/login" className={getNavLinkClass}>Login</NavLink>
       </nav>
 
       {/* Seção Direita */}
       <div className="navbar-right">
-        <div className="location">
-          <span className="icon-placeholder" style={{ marginRight: '4px' }}>📍</span>
-          <span>Brasília, Brasil</span>
-          <span className="icon-placeholder" style={{ marginLeft: '4px' }}>▼</span>
-        </div>
-
         <NavLink to="/notificacoes" className="notification-button">
           <div className="notification-wrapper">
             <span className="icon-placeholder notification-bell-placeholder" style={{ fontSize: '22px' }}>🔔</span>
@@ -56,9 +64,14 @@ const Navbar: React.FC = () => {
             )}
           </div>
         </NavLink>
-
-        {/* AVATAR AGORA USA UM ASSET IMPORTADO */}
-        <img src={userAvatar} alt="Avatar do Usuário" className="avatar-actual" />
+         <NavLink to="/perfil" className="avatar-button">
+          <img
+            src={userAvatar || defaultavatar}
+            alt="Avatar do Usuário"
+            className="avatar-actual"
+          />
+        </NavLink>
+        
       </div>
     </header>
   );
