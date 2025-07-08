@@ -73,7 +73,7 @@ test('submete o formulário com sucesso e redireciona', async () => {
   });
   
   await waitFor(() => {
-    expect(mockNavigate).toHaveBeenCalledWith('/planoViagem');
+    expect(mockNavigate).toHaveBeenCalledWith('/plano-viagens');
   });
 
   alertSpy.mockRestore();
