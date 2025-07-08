@@ -84,7 +84,7 @@ const CreateItineraryPage: React.FC = () => {
     }
     await response.json(); 
     alert("Plano de viagem criado com sucesso!");
-    navigate('/planoViagem');
+    navigate('/plano-viagens');
 
     } catch (err) {
       setError(err instanceof Error ? err.message : "Ocorreu um erro.");

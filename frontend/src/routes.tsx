@@ -8,16 +8,16 @@ import DestinationInfo from './pages/DestinationInfo';
 import Profile from './pages/Profile'
 
 import CreateItineraryPage from './pages/itinerario';
-import EditarItinerario from './pages/editaritinerario';
+import EditarItinerario from './pages/EditarItinerario';
 function AppRoutes() {
   return (
     <Router>
       <Routes>
         <Route path="/home" element={<Home />} />
         <Route path="/perfil" element={<Profile />} />
-        <Route path="/" element={<Navigate to="/planoViagem" replace />} />
+        <Route path="/" element={<Navigate to="/plano-viagens" replace />} />
         <Route path="/example-page" element={<ExamplePage />} />
-        <Route path="/planoViagem" element={<PlanoViagens />} />
+        <Route path="/plano-viagens" element={<PlanoViagens />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
         <Route path='/destination-info' element={<DestinationInfo/>} />
