@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Navbar from "../components/NavBar";
-import "./plano-viagens.css";
+import "./Plano-Viagens.css";
 
 interface UpdateItineraryPayload {
   title: string;
