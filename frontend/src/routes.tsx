@@ -6,12 +6,14 @@ import Signup from './pages/Signup';
 import Login from './pages/Login';
 import DestinationInfo from './pages/DestinationInfo';
 import RecoverPassword from "@/pages/RecoverPassword";
+import Profile from './pages/Profile'
 
 function AppRoutes() {
   return (
     <Router>
       <Routes>
         <Route path="/home" element={<Home />} />
+        <Route path="/perfil" element={<Profile />} />
         <Route path="/" element={<Navigate to="/planoViagem" replace />} />
         <Route path="/example-page" element={<ExamplePage />} />
         <Route path="/planoViagem" element={<PlanoViagens />} />
