@@ -1,5 +1,5 @@
 import React from "react";
-import "./Modal.css";
+import "./modal.css";
 
 type ModalProps = {
   title: string;
