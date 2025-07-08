@@ -27,6 +27,7 @@ export default function RecoverPasswordForm() {
     });
 
     function onSubmit(data: z.infer<typeof RecoverPasswordSchema>) {
+        //Chamar o endpoint que faz a recuperação de senha enviando o email no corpo
         toast(JSON.stringify(data), {
             icon: <CircleCheckIcon className="text-emerald-500 w-5 h-5" />,
         });
