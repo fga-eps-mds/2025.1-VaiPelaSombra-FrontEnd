@@ -29,7 +29,7 @@ const Navbar: React.FC = () => {
       <nav className="navbar-center">
         <NavLink to="/" className={getNavLinkClass}>Página Principal</NavLink>
         <NavItemSeparator />
-        <NavLink to="/planoViagem" className={getNavLinkClass}>Planos de Viagens</NavLink>
+        <NavLink to="/plano-viagens" className={getNavLinkClass}>Planos de Viagens</NavLink>
         <NavItemSeparator />
         <NavLink to="/guias-viagem" className={getNavLinkClass}>Guias de Viagem</NavLink>
         <NavItemSeparator />
