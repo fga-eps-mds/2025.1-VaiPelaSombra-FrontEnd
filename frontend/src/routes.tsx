@@ -5,8 +5,10 @@ import PlanoViagens from './pages/Plano-Viagens';
 import Signup from './pages/Signup';
 import Login from './pages/Login';
 import DestinationInfo from './pages/DestinationInfo';
+import CreateItineraryPage from './pages/itinerario';
+import EditarItinerario from './pages/EditarItinerario';
+import Profile from './pages/Profile';
 import RecoverPassword from "@/pages/RecoverPassword";
-import Profile from './pages/Profile'
 import ResumoViagem from './pages/ResumoViagem';
 
 
@@ -16,12 +18,14 @@ function AppRoutes() {
       <Routes>
         <Route path="/home" element={<Home />} />
         <Route path="/perfil" element={<Profile />} />
-        <Route path="/" element={<Navigate to="/planoViagem" replace />} />
+        <Route path="/" element={<Navigate to="/plano-viagens" replace />} />
         <Route path="/example-page" element={<ExamplePage />} />
-        <Route path="/planoViagem" element={<PlanoViagens />} />
+        <Route path="/plano-viagens" element={<PlanoViagens />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
         <Route path='/destination-info' element={<DestinationInfo/>} />
+        <Route path="/criar-plano" element={<CreateItineraryPage />} />
+        <Route path="/editar-plano/:itineraryId" element={<EditarItinerario />} />
         <Route path="/recover-password" element={<RecoverPassword />} />
         <Route path='/resumo-viagem' element={<ResumoViagem />} />
       </Routes>
