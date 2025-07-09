@@ -39,7 +39,11 @@ const EditarItinerario: React.FC = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       const itineraries = await response.json();
-      const plan = itineraries.find((i: any) => i.id === parseInt(itineraryId || "", 10));
+      const plan = itineraries.find(
+      (i: { id: number; title: string; startDate: string; endDate: string; lodgingBudget?: number; foodBudget?: number; totalBudget?: number }) =>
+        i.id === parseInt(itineraryId || "", 10)
+);
+
       if (plan) {
         setFormData({
           title: plan.title,
@@ -50,7 +54,7 @@ const EditarItinerario: React.FC = () => {
           totalBudget: plan.totalBudget?.toString() || "",
         });
       }
-    } catch (err) {
+    } catch {
       setError("Erro ao carregar dados da viagem.");
     }
   };
@@ -85,7 +89,7 @@ const EditarItinerario: React.FC = () => {
       if (!response.ok) throw new Error("Erro ao atualizar plano.");
       alert("Plano atualizado com sucesso!");
       navigate("/plano-viagens");
-    } catch (err) {
+    } catch {
       setError("Erro ao atualizar plano.");
     } finally {
       setIsLoading(false);
