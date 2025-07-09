@@ -48,7 +48,7 @@
   overflow-x: auto;          /* Habilita scroll horizontal */
   gap: 8px;                  /* Espaço entre os cards */
   padding-bottom: 8px;       /* Espaço para a barra de rolagem */
-  scrollbar-width: thin;     /* Firefox */
+  scrollbar-width: thin;     /* Firefox; não suportado em vários (outros) navegadores */
 }
 
 /* Fallback para navegadores Webkit (Chrome, Edge, Opera, etc.) */
