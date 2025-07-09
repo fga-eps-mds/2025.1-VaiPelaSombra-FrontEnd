@@ -9,6 +9,7 @@ import RecoverPassword from "@/pages/RecoverPassword";
 import Profile from './pages/Profile'
 import ResumoViagem from './pages/ResumoViagem';
 
+
 function AppRoutes() {
   return (
     <Router>
