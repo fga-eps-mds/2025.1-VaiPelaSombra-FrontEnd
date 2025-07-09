@@ -48,7 +48,7 @@
   overflow-x: auto;          /* Habilita scroll horizontal */
   gap: 8px;                  /* Espaço entre os cards */
   padding-bottom: 8px;       /* Espaço para a barra de rolagem */
-  scrollbar-width: thin;     /* Firefox */
+  scrollbar-width: thin;     /* Firefox; não suportado em vários (outros) navegadores */
 }
 
 /* Fallback para navegadores Webkit (Chrome, Edge, Opera, etc.) */
@@ -59,4 +59,149 @@
 .plano-viagens-cards::-webkit-scrollbar-thumb {
   background: #e0e0e0;
   border-radius: 4px;
+}
+.primary-navigate-button-container button {
+
+  background-color: #223A60;
+  color: white;
+  padding: 0.8rem 1.2rem; 
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  font-size: 1rem; 
+  transition: background-color 0.2s;
+  display: inline-block;
+  line-height: 1.5; 
+}
+
+.primary-navigate-button-container button:hover {
+  background-color: #314e7e;
+}
+.plano-bg {
+  background-color: #f4f7f6;
+  min-height: 100vh;
+  overflow-y: auto;
+}
+
+.plano-container {
+  max-width: 800px;
+  margin: 2rem auto;
+  margin: 6rem auto 2rem;
+  padding: 2rem;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.plano-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.plano-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #333;
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+.plano-description {
+  text-align: center;
+  color: #666;
+  margin-bottom: 2.5rem;
+}
+
+.plano-subtitle {
+  font-size: 1.25rem;
+  color: #444;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #eee;
+}
+
+.plano-form-group {
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.plano-label {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #555;
+}
+
+.plano-input {
+  padding: 0.8rem 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.plano-form-row {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.flex1 {
+  flex: 1;
+}
+
+.plano-error {
+  color: #d93025;
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  padding: 0.8rem;
+  border-radius: 8px;
+  text-align: center;
+  margin-top: 1.5rem;
+}
+
+.plano-submit {
+  width: 100%;
+  padding: 1rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #fff;
+  background-color: #223A60;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin-top: 1.5rem;
+}
+
+.plano-submit:hover:not(:disabled) {
+  background-color: #1b344e;
+}
+
+.plano-submit.loading {
+  background-color: #b9d0e7;
+  cursor: not-allowed;
+}
+.travel-plan-edit-button {
+  margin-top: 2rem;
+  padding: 0.5rem 1rem;
+  background-color: #223a60;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.2s ease;
+}
+
+.travel-plan-edit-button:hover {
+  background-color: #1a2f50;
+}
+.travel-plan-users-names {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  color: #555;
 }
