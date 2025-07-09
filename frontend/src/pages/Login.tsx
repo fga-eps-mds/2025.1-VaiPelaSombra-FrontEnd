@@ -120,7 +120,7 @@ function Login() {
               <div className="flex flex-col space-y-1 px-7">
                 <div className="flex justify-between items-center">
                   <label htmlFor="senha" className="text-sans text-[#223A60] font-md">Senha</label>
-                  <a href="#" className="text-sm text-[#223A60] hover:underline font-sans">Esqueceu a senha?</a>
+                  <a href="#" className="text-sm text-[#223A60] hover:underline font-sans" onClick={() => navigate('/recover-password')}>Esqueceu a senha?</a>
                 </div>
                 <div className="relative w-full">
                   <input

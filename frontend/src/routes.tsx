@@ -8,6 +8,9 @@ import DestinationInfo from './pages/DestinationInfo';
 import CreateItineraryPage from './pages/itinerario';
 import EditarItinerario from './pages/EditarItinerario';
 import Profile from './pages/Profile';
+import RecoverPassword from "@/pages/RecoverPassword";
+import ResumoViagem from './pages/ResumoViagem';
+
 
 function AppRoutes() {
   return (
@@ -23,6 +26,8 @@ function AppRoutes() {
         <Route path='/destination-info' element={<DestinationInfo/>} />
         <Route path="/criar-plano" element={<CreateItineraryPage />} />
         <Route path="/editar-plano/:itineraryId" element={<EditarItinerario />} />
+        <Route path="/recover-password" element={<RecoverPassword />} />
+        <Route path='/resumo-viagem' element={<ResumoViagem />} />
       </Routes>
     </Router>
   );

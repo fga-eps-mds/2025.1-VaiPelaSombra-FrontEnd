@@ -10,3 +10,7 @@ export const SignupSchema = z.object({
         message: "As senhas não coincidem",
         path: ['confirmPassword'],
     });
+
+export const RecoverPasswordSchema = z.object({
+    email: z.string().email('Email inválido').nonempty('Email é obrigatório'),
+});
