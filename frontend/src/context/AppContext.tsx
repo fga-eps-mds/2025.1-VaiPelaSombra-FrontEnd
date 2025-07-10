@@ -21,6 +21,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   )
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAppContext = (): AppContextType => {
   const context = useContext(AppContext)
   if (!context) {
