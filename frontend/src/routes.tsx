@@ -28,6 +28,8 @@ function AppRoutes() {
         <Route path="/editar-plano/:itineraryId" element={<EditarItinerario />} />
         <Route path="/recover-password" element={<RecoverPassword />} />
         <Route path='/resumo-viagem' element={<ResumoViagem />} />
+        <Route path="/destino/:destinationId" element={<DestinationInfo />} />
+
       </Routes>
     </Router>
   );
