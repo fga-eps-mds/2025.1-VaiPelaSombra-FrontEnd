@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import config from '@/config';
 
 interface User {
   id: number;
@@ -25,7 +26,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const isAuthenticated = !!user && !!accessToken;
 
   const login = async (email: string, password: string) => {
-    const res = await fetch('http://localhost:3000/auth/login', {
+    const res = await fetch(`${config.apiBaseUrl}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -41,7 +42,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const logout = async () => {
-    await fetch('http://localhost:3000/auth/logout', {
+    await fetch(`${config.apiBaseUrl}/auth/logout`, {
       method: 'POST',
       credentials: 'include',
     });
@@ -50,7 +51,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const refresh = async () => {
-    const res = await fetch('http://localhost:3000/auth/refresh', {
+    const res = await fetch(`${config.apiBaseUrl}/auth/refresh`, {
       method: 'POST',
       credentials: 'include',
     });
