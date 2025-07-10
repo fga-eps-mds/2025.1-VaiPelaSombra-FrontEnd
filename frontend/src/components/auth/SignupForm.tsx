@@ -13,8 +13,9 @@ import {
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { toast } from "sonner";
-import { CircleCheckIcon } from "lucide-react";
+//import { CircleCheckIcon } from "lucide-react";
 import { z } from "zod";
+import axios from "axios";
 
 export default function SignupForm() {
 
@@ -28,12 +29,26 @@ export default function SignupForm() {
             },
         });
 
-        function onSubmit(data: z.infer<typeof SignupSchema>) {
-            // dados para o backend
-            toast(JSON.stringify(data), {
-                icon: <CircleCheckIcon className="text-emerald-500 w-5 h-5" />,
-            });
+       async function onSubmit(data: z.infer<typeof SignupSchema>) {
+        try {
+          const payload = {
+            name: data.fullname,
+            email: data.email,
+            password: data.password,
+          };
+
+          await axios.post("http://localhost:3000/users", payload);
+
+          toast.success("Conta criada com sucesso!");
+          form.reset();
+        } catch (error: unknown) {
+          const message =
+            axios.isAxiosError(error) && error.response?.data?.message
+              ? error.response.data.message
+              : "Ocorreu um erro. Tente novamente.";
+          toast.error(message);
         }
+      }
 
     return (
         <CardForm
