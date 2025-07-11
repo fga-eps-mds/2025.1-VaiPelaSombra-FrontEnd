@@ -1,112 +1,134 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Navbar from "../components/NavBar";
 import "./ResumoViagem.css";
 
-const checklist = [
-  { categoria: "Documentos", itens: ["Passaporte", "Identidade", "Carteira com cartão", "Reserva do hotel"] },
-  { categoria: "Higiene pessoal", itens: ["Pasta de dente", "Escova", "Sabonete", "Shampoo"] },
-  { categoria: "Roupas", itens: ["Roupas íntimas", "Camiseta", "Short", "Meia"] },
-];
+import {
+  fetchTransportes,
+  criarTransporte,
+  deletarTransporte,
+  atualizarTransporte,
+  Transporte,
+} from "../api/transportApi";
 
-const etapas = [
-  {
-    etapa: "Brasília → Paris",
-    meio: "Avião",
-    saida: "2025-07-10T16:00:00-03:00", // Horário local de Brasília
-    chegada: "2025-07-11T07:00:00+02:00", // Horário local de Paris
-  },
-  {
-    etapa: "Paris → Amsterdam",
-    meio: "Trem",
-    saida: "2025-07-12T09:00:00+02:00",
-    chegada: "2025-07-12T12:00:00+02:00",
-  },
-];
-
-const resumo = [
-  "Viagem internacional para turismo.",
-  "Participação em eventos culturais.",
-  "Visita a pontos turísticos famosos.",
-];
-
-const cronograma = [
-  { dia: "10/07/2025", atividade: "Chegada em Paris, check-in no hotel" },
-  { dia: "11/07/2025", atividade: "Tour: Torre Eiffel e Museu do Louvre" },
-  { dia: "12/07/2025", atividade: "Viagem para Amsterdam" },
-];
-
-const UTC_TITLE = "UTC: Tempo Universal Coordenado, o horário de referência mundial, baseado no horário no meridiano de Greenwich (GMT).";
+const ITINERARY_ID_FIXO = 1;
 
 function ResumoViagem() {
   const [aba, setAba] = useState("checklist");
-  const [transportes, setTransportes] = useState([
-    { tipo: "Avião", companhia: "Latam", numero: "LA1234", data: "2025-07-10" },
-  ]);
-  const [novoTransporte, setNovoTransporte] = useState({ tipo: "", companhia: "", numero: "", data: "" });
+  const [transportes, setTransportes] = useState<Transporte[]>([]);
+  const [novoTransporte, setNovoTransporte] = useState<Partial<Transporte>>({
+    type: "",
+    cost: 0,
+    departure: "",
+    arrival: "",
+    duration: "",
+    description: "",
+    itineraryId: ITINERARY_ID_FIXO,
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [editandoId, setEditandoId] = useState<number | null>(null);
+  const [transporteEditado, setTransporteEditado] = useState<Partial<Transporte>>({});
 
-  function handleAddTransporte(e: React.FormEvent) {
+  // Carregar transportes ao montar
+  useEffect(() => {
+    carregarTransportes();
+  }, []);
+
+  async function carregarTransportes() {
+    setLoading(true);
+    setError(null);
+    try {
+      const dados = await fetchTransportes();
+      setTransportes(dados.filter(t => t.itineraryId === ITINERARY_ID_FIXO));
+    } catch (err) {
+      setError("Erro ao carregar transportes");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // Adicionar transporte
+  async function handleAddTransporte(e: React.FormEvent) {
     e.preventDefault();
-    setTransportes([...transportes, novoTransporte]);
-    setNovoTransporte({ tipo: "", companhia: "", numero: "", data: "" });
+    setError(null);
+
+    if (!novoTransporte.type) {
+      setError("O campo 'Tipo' é obrigatório.");
+      return;
+    }
+
+    if (novoTransporte.cost === undefined || novoTransporte.cost < 0) {
+      setError("O campo 'Valor' deve ser um número positivo.");
+      return;
+    }
+
+    try {
+      const criado = await criarTransporte({
+        ...novoTransporte,
+        itineraryId: ITINERARY_ID_FIXO,
+        cost: novoTransporte.cost!,
+      } as Transporte);
+      setTransportes(old => [...old, criado]);
+      setNovoTransporte({
+        type: "",
+        cost: 0,
+        departure: "",
+        arrival: "",
+        duration: "",
+        description: "",
+        itineraryId: ITINERARY_ID_FIXO,
+      });
+    } catch (err) {
+      setError("Erro ao adicionar transporte");
+      console.error(err);
+    }
   }
 
-  // Função utilitária para formatar datas
-  function formatarDataHora(dt: string) {
-    const data = new Date(dt);
-    // Horário local
-    const local = data.toLocaleString("pt-BR", {
-      dateStyle: "short",
-      timeStyle: "short",
-    });
-    // Horário UTC
-    const utc = data.toLocaleString("pt-BR", {
-      dateStyle: "short",
-      timeStyle: "short",
-      timeZone: "UTC",
-    });
-    return { local, utc, data };
+  // Deletar transporte
+  async function handleDeletar(id?: number) {
+    if (!id) return;
+    if (!window.confirm("Confirma exclusão do transporte?")) return;
+    setError(null);
+    try {
+      await deletarTransporte(id);
+      setTransportes(old => old.filter(t => t.id !== id));
+    } catch (err) {
+      setError("Erro ao deletar transporte");
+      console.error(err);
+    }
   }
 
-  /*
-	// Função para calcular diferença de dias
-  function diferencaDias(dataSaida: Date, dataChegada: Date) {
-    const diff = Math.floor(
-      (dataChegada.getTime() - dataSaida.getTime()) / (1000 * 60 * 60 * 24)
-    );
-    return diff;
+  // Iniciar edição
+  function iniciarEdicao(t: Transporte) {
+    setEditandoId(t.id || null);
+    setTransporteEditado({ ...t });
   }
-		*/
-	// Função para diferença de dias do calendário local
-	function diferencaDiasCalendario(dataSaida: Date, dataChegada: Date) {
-		// Zera horas para comparar só o dia
-		const saida = new Date(dataSaida.getFullYear(), dataSaida.getMonth(), dataSaida.getDate());
-		const chegada = new Date(dataChegada.getFullYear(), dataChegada.getMonth(), dataChegada.getDate());
-		const diff = Math.round((chegada.getTime() - saida.getTime()) / (1000 * 60 * 60 * 24));
-		return diff;
-	}
 
-	// Função para diferença de dias do calendário UTC
-	function diferencaDiasCalendarioUTC(dataSaida: Date, dataChegada: Date) {
-		const saidaUTC = new Date(Date.UTC(dataSaida.getUTCFullYear(), dataSaida.getUTCMonth(), dataSaida.getUTCDate()));
-		const chegadaUTC = new Date(Date.UTC(dataChegada.getUTCFullYear(), dataChegada.getUTCMonth(), dataChegada.getUTCDate()));
-		const diff = Math.round((chegadaUTC.getTime() - saidaUTC.getTime()) / (1000 * 60 * 60 * 24));
-		return diff;
-	}
+  // Cancelar edição
+  function cancelarEdicao() {
+    setEditandoId(null);
+    setTransporteEditado({});
+  }
 
-  // Função para calcular duração total
-  function duracaoViagem(dataSaida: Date, dataChegada: Date) {
-    const diffMs = dataChegada.getTime() - dataSaida.getTime();
-    const totalMin = Math.floor(diffMs / (1000 * 60));
-    const dias = Math.floor(totalMin / (60 * 24));
-    const horas = Math.floor((totalMin % (60 * 24)) / 60);
-    const minutos = totalMin % 60;
+  // Salvar edição
+  async function salvarEdicao() {
+    if (!editandoId) return;
+    setError(null);
+    try {
+      const atualizado = await atualizarTransporte(editandoId, transporteEditado as Transporte);
+      setTransportes(old => old.map(t => (t.id === editandoId ? atualizado : t)));
+      cancelarEdicao();
+    } catch (err) {
+      setError("Erro ao atualizar transporte");
+      console.error(err);
+    }
+  }
 
-    let resultado = "";
-    if (dias > 0) resultado += `${dias}d `;
-    if (horas > 0 || dias > 0) resultado += `${horas}h `;
-    resultado += `${minutos}min`;
-
-    return resultado.trim();
+  function formatarDataHora(dt?: string) {
+    if (!dt) return "";
+    const d = new Date(dt);
+    return d.toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
   }
 
   return (
@@ -122,180 +144,126 @@ function ResumoViagem() {
           <button className={aba === "transportes" ? "ativa" : ""} onClick={() => setAba("transportes")}>Transportes</button>
         </div>
 
-        {aba === "checklist" && (
-          <div className="resumo-tabela-wrapper">
-            <table className="resumo-tabela">
-              <thead>
-                <tr>
-                  <th>Categoria</th>
-                  <th>Item</th>
-                  <th>Feito</th>
-                </tr>
-              </thead>
-              <tbody>
-                {checklist.map((cat) =>
-                  cat.itens.map((item, idx) => (
-                    <tr key={item}>
-                      {idx === 0 && (
-                        <td rowSpan={cat.itens.length} className="categoria">{cat.categoria}</td>
-                      )}
-                      <td>{item}</td>
-                      <td>
-                        <input
-                          name="checklist-item"
-                          type="checkbox"
-                          placeholder="Marcar como feito"
-                        />
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        )}
-
-        {aba === "tempo" && (
-          <div className="resumo-tabela-wrapper">
-            <table className="resumo-tabela">
-              <thead>
-                <tr>
-                  <th>Etapa</th>
-                  <th title={UTC_TITLE}>
-                    Saída<br />(local / UTC)
-                  </th>
-                  <th title={UTC_TITLE}>
-                    Chegada<br />(local / UTC)
-                  </th>
-                  <th>Duração</th>
-                  <th>Meio de transporte</th>
-                </tr>
-              </thead>
-              <tbody>
-                {etapas.map((e, idx) => {
-									const { local: saidaLocal, utc: saidaUTC, data: dataSaida } = formatarDataHora(e.saida);
-									const { local: chegadaLocal, utc: chegadaUTC, data: dataChegada } = formatarDataHora(e.chegada);
-
-									// Diferença de dias do calendário local e UTC
-									const diasLocal = diferencaDiasCalendario(dataSaida, dataChegada);
-									const diasUTC = diferencaDiasCalendarioUTC(dataSaida, dataChegada);
-
-									const duracao = duracaoViagem(dataSaida, dataChegada);
-
-									return (
-										<tr key={idx}>
-											<td>{e.etapa}</td>
-											<td>
-												{saidaLocal}
-												<br />
-												<span className="resumo-hora-utc" title={UTC_TITLE}>
-													{saidaUTC} UTC
-												</span>
-											</td>
-											<td>
-												{chegadaLocal}
-												{diasLocal > 0 && (
-													<span className="resumo-dia-extra">
-														{" "} (+{diasLocal} dia{diasLocal > 1 ? "s" : ""})
-													</span>
-												)}
-												<br />
-												<span className="resumo-hora-utc" title={UTC_TITLE}>
-													{chegadaUTC} UTC
-													{diasUTC > 0 && (
-														<span className="resumo-dia-extra">
-															{" "} (+{diasUTC} dia{diasUTC > 1 ? "s" : ""})
-														</span>
-													)}
-												</span>
-											</td>
-											<td>{duracao}</td>
-											<td>{e.meio}</td>
-										</tr>
-									);
-								})}
-              </tbody>
-            </table>
-          </div>
-        )}
-
-        {aba === "resumo" && (
-					<div className="resumo-lista">
-						{resumo.map((linha, idx) => (
-							<p key={idx} className="resumo-paragrafo">{linha}</p>
-						))}
-					</div>
-				)}
-
-        {aba === "cronograma" && (
-          <div className="resumo-tabela-wrapper">
-            <table className="resumo-tabela">
-              <thead>
-                <tr>
-                  <th>Dia</th>
-                  <th>Atividade</th>
-                </tr>
-              </thead>
-              <tbody>
-                {cronograma.map((c, idx) => (
-                  <tr key={idx}>
-                    <td>{c.dia}</td>
-                    <td>{c.atividade}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-
         {aba === "transportes" && (
           <div className="resumo-transportes">
             <h2>Transportes</h2>
+            {loading && <p>Carregando transportes...</p>}
+            {error && <p className="erro">{error}</p>}
+
             <form className="transporte-form" onSubmit={handleAddTransporte}>
               <input
                 placeholder="Tipo (ex: Avião, Ônibus)"
-                value={novoTransporte.tipo}
-                onChange={e => setNovoTransporte({ ...novoTransporte, tipo: e.target.value })}
+                value={novoTransporte.type || ""}
+                onChange={e => setNovoTransporte({ ...novoTransporte, type: e.target.value })}
                 required
               />
               <input
-                placeholder="Companhia"
-                value={novoTransporte.companhia}
-                onChange={e => setNovoTransporte({ ...novoTransporte, companhia: e.target.value })}
-              />
-              <input
-                placeholder="Número"
-                value={novoTransporte.numero}
-                onChange={e => setNovoTransporte({ ...novoTransporte, numero: e.target.value })}
-              />
-              <input
-                id="dataViagem"
-                type="date"
-                value={novoTransporte.data}
-                onChange={e => setNovoTransporte({ ...novoTransporte, data: e.target.value })}
+                placeholder="Valor"
+                type="number"
+                min={0}
+                value={novoTransporte.cost !== undefined ? novoTransporte.cost : ""}
+                onChange={e => setNovoTransporte({ ...novoTransporte, cost: Number(e.target.value) })}
                 required
-                title="Selecione a data da viagem"
+              />
+              <input
+                type="datetime-local"
+                value={novoTransporte.departure || ""}
+                onChange={e => setNovoTransporte({ ...novoTransporte, departure: e.target.value })}
+              />
+              <input
+                type="datetime-local"
+                value={novoTransporte.arrival || ""}
+                onChange={e => setNovoTransporte({ ...novoTransporte, arrival: e.target.value })}
+              />
+              <input
+                placeholder="Duração"
+                value={novoTransporte.duration || ""}
+                onChange={e => setNovoTransporte({ ...novoTransporte, duration: e.target.value })}
+              />
+              <input
+                placeholder="Descrição"
+                value={novoTransporte.description || ""}
+                onChange={e => setNovoTransporte({ ...novoTransporte, description: e.target.value })}
               />
               <button type="submit">Adicionar</button>
             </form>
+
             <table className="resumo-tabela">
               <thead>
                 <tr>
                   <th>Tipo</th>
-                  <th>Companhia</th>
-                  <th>Número</th>
-                  <th>Data</th>
+                  <th>Valor</th>
+                  <th>Saída</th>
+                  <th>Chegada</th>
+                  <th>Duração</th>
+                  <th>Descrição</th>
+                  <th>Ações</th>
                 </tr>
               </thead>
               <tbody>
-                {transportes.map((t, idx) => (
-                  <tr key={idx}>
-                    <td>{t.tipo}</td>
-                    <td>{t.companhia}</td>
-                    <td>{t.numero}</td>
-                    <td>{t.data}</td>
-                  </tr>
-                ))}
+                {transportes.map(t =>
+                  editandoId === t.id ? (
+                    <tr key={t.id}>
+                      <td>
+                        <input
+                          value={transporteEditado.type || ""}
+                          onChange={e => setTransporteEditado({ ...transporteEditado, type: e.target.value })}
+                        />
+                      </td>
+                      <td>
+                        <input
+                          type="number"
+                          min={0}
+                          value={transporteEditado.cost !== undefined ? transporteEditado.cost : ""}
+                          onChange={e => setTransporteEditado({ ...transporteEditado, cost: Number(e.target.value) })}
+                        />
+                      </td>
+                      <td>
+                        <input
+                          type="datetime-local"
+                          value={transporteEditado.departure || ""}
+                          onChange={e => setTransporteEditado({ ...transporteEditado, departure: e.target.value })}
+                        />
+                      </td>
+                      <td>
+                        <input
+                          type="datetime-local"
+                          value={transporteEditado.arrival || ""}
+                          onChange={e => setTransporteEditado({ ...transporteEditado, arrival: e.target.value })}
+                        />
+                      </td>
+                      <td>
+                        <input
+                          value={transporteEditado.duration || ""}
+                          onChange={e => setTransporteEditado({ ...transporteEditado, duration: e.target.value })}
+                        />
+                      </td>
+                      <td>
+                        <input
+                          value={transporteEditado.description || ""}
+                          onChange={e => setTransporteEditado({ ...transporteEditado, description: e.target.value })}
+                        />
+                      </td>
+                      <td>
+                        <button onClick={salvarEdicao}>Salvar</button>
+                        <button onClick={cancelarEdicao}>Cancelar</button>
+                      </td>
+                    </tr>
+                  ) : (
+                    <tr key={t.id}>
+                      <td>{t.type}</td>
+                      <td>{t.cost ?? "-"}</td>
+                      <td>{formatarDataHora(t.departure)}</td>
+                      <td>{formatarDataHora(t.arrival)}</td>
+                      <td>{t.duration ?? "-"}</td>
+                      <td>{t.description ?? "-"}</td>
+                      <td>
+                        <button onClick={() => iniciarEdicao(t)}>Editar</button>
+                        <button onClick={() => handleDeletar(t.id)}>Excluir</button>
+                      </td>
+                    </tr>
+                  )
+                )}
               </tbody>
             </table>
           </div>
