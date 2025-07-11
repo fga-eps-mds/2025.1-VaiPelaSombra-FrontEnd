@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { MapPin } from "lucide-react";
 import NoImage from "../../assets/NoImage.png"
-import config from "../../config";
+import {config} from "../../config";
 
 interface Destination {
   id: number;
