@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/NavBar';
 import "./Plano-Viagens.css";
+import config from '../config';
 
 interface CreateItineraryPayload {
   title: string;
@@ -73,7 +74,7 @@ const CreateItineraryPage: React.FC = () => {
     if (formData.totalBudget) payload.totalBudget = parseFloat(formData.totalBudget);
 
     try {
-      const response = await fetch(`http://localhost:3000/itineraries/${userId}`, {
+      const response = await fetch(`${config.apiBaseUrl}/itineraries/${userId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(payload),

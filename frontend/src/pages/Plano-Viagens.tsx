@@ -4,6 +4,7 @@ import TravelPlanCard from "../components/TravelPlanCard";
 import Modal from "../components/ui/modal";
 import "./Plano-Viagens.css";
 import NavigateButton from "../components/NavigateButton";
+import config from "../config";
 
 type User = {
   id: number;
@@ -51,7 +52,7 @@ const PlanoViagens: React.FC = () => {
     }
 
     try {
-      const response = await fetch(`http://localhost:3000/itineraries/${userId}`, {
+      const response = await fetch(`${config.apiBaseUrl}/itineraries/${userId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!response.ok) {
@@ -119,7 +120,7 @@ const PlanoViagens: React.FC = () => {
     }
 
     const response = await fetch(
-      `http://localhost:3000/itineraries/${itineraryId}/users/${userId}`,
+      `${config.apiBaseUrl}/itineraries/${itineraryId}/users/${userId}`,
       {
         method: "POST",
         headers: {
