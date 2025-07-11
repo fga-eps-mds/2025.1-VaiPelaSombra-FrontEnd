@@ -4,7 +4,8 @@ import imagem4 from '../assets/imagem4.jpg';
 import Umbrella from '../assets/umbrella.svg';
 import EyeToggle from '../components/ui/eye_toggle';
 import estilo from '../assets/estilo.png';
-
+import config from '../config';
+import { useAuth } from "../context/AuthContext";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -14,6 +15,7 @@ function Login() {
   const [mostrarSenha, setMostrarSenha] = useState(false);
   const [apiError, setApiError] = useState("");
   const [loading, setLoading] = useState(false);
+  const {login} = useAuth();
 
   const navigate = useNavigate();
 
@@ -45,7 +47,7 @@ function Login() {
   };
 
   const autenticarUsuario = async () => {
-    const response = await fetch("http://localhost:3000/login", {
+    const response = await fetch(`${config.apiBaseUrl}/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password}),
@@ -71,7 +73,8 @@ function Login() {
   setLoading(true);
 
   try {
-    await autenticarUsuario();
+    await login(email, password)
+    navigate("/home");
   } catch (err) {
     if (err instanceof Error) {
       setApiError(err.message);
