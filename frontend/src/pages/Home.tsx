@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Navbar from "../components/NavBar.tsx";
 import ImagemFundo3 from "../assets/ImagemFundo3.jpeg"
 import axios from "axios";
-
+import config from "../config";
 
 interface Destination {
   id: number;
@@ -19,7 +19,7 @@ export default function Home() {
 
   async function fetchDestinos(title?: string) {
     try {
-      const response = await axios.get("http://localhost:3000/home",
+      const response = await axios.get(`${config.apiBaseUrl}/home`,
         {
         params: title ? { search: title } : {},
         }
