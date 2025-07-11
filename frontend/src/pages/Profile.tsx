@@ -3,7 +3,7 @@ import ProfileCard from "../components/ui/profilecard";
 import ProfileForm from "../components/ui/profileform";
 import defaultavatar from '../assets/images/defaultavatar.png';
 import Navbar from "../components/NavBar.tsx";
-import config from "../config";
+import {config} from "../config";
 
 type ProfileType = {
   name: string;

@@ -4,7 +4,7 @@ import TravelPlanCard from "../components/TravelPlanCard";
 import Modal from "../components/ui/modal";
 import "./Plano-Viagens.css";
 import NavigateButton from "../components/NavigateButton";
-import config from "../config";
+import {config} from "../config";
 
 type User = {
   id: number;
