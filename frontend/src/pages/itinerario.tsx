@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/NavBar';
 import "./Plano-Viagens.css";
-import config from '../config';
+import {config} from '../config';
 
 interface CreateItineraryPayload {
   title: string;
