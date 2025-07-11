@@ -1,5 +1,11 @@
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import {config} from '@/config';
+
+
+
+const config = {
+  apiBaseUrl: import.meta.env.VITE_API_BASE_URL,
+} as const;
+
 
 interface User {
   id: number;
