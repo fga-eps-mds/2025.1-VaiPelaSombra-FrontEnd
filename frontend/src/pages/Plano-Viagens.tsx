@@ -1,87 +1,203 @@
+import { useEffect, useState, useCallback } from "react";
 import Navbar from "../components/NavBar.tsx";
 import TravelPlanCard from "../components/TravelPlanCard";
+import Modal from "../components/ui/modal";
 import "./Plano-Viagens.css";
-import { useEffect, useState } from "react";
+import NavigateButton from "../components/NavigateButton";
 
 type User = {
+  id: number;
   name: string;
-  avatar: string;
+};
+
+type ApiItinerary = {
+  id: number;
+  title: string;
+  startDate: string;
+  users: User[];
 };
 
 type TravelPlan = {
+  id: number;
   title: string;
-  image: string;
   users: User[];
   date: string;
   daysLeft: number;
   faded?: boolean;
 };
 
-// Tipo para os dados retornados pela API
-type ApiTravelPlan = {
-  nome: string;
-  dataInicio: string;
-};
-
 const PlanoViagens: React.FC = () => {
   const [travelPlans, setTravelPlans] = useState<TravelPlan[]>([]);
   const [travelHistory, setTravelHistory] = useState<TravelPlan[]>([]);
+  const [showModal, setShowModal] = useState(false);
+  const [linkInput, setLinkInput] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const userId = 1; // modificar depois que obtivermos o useAuth
-    fetch(`http://localhost:3000/PlanoViagem/${userId}`)
-      .then((res) => res.json())
-      .then((data: ApiTravelPlan[]) => {
-        const now = new Date();
-        const upcoming = data.filter((plan) => new Date(plan.dataInicio) > now);
-        const history = data.filter((plan) => new Date(plan.dataInicio) <= now);
+  const getAuthToken = () => {
+    return localStorage.getItem("authToken");
+  };
 
-        const formatPlan = (plan: ApiTravelPlan, faded = false): TravelPlan => ({
-          title: plan.nome,
-          image: "/src/assets/images/La_Tour_Eiffel_vue_de_la_Tour_Saint-Jacques,_Paris_août_2014_(2).webp",
-          users: [],
-          date: new Date(plan.dataInicio).toLocaleDateString("pt-BR"),
-          daysLeft: Math.max(
-            0,
-            Math.ceil(
-              (new Date(plan.dataInicio).getTime() - now.getTime()) /
-                (1000 * 60 * 60 * 24)
-            )
-          ),
-          faded,
-        });
+ const fetchTravelPlans = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    const token = getAuthToken();
+    const userId = localStorage.getItem("userId");
 
-        setTravelPlans(upcoming.map((p) => formatPlan(p)));
-        setTravelHistory(history.map((p) => formatPlan(p, true)));
-      })
-      .catch((err) => {
-        console.error("Erro ao buscar planos:", err);
+    if (!token || !userId) {
+      setError("Usuário não autenticado.");
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const response = await fetch(`http://localhost:3000/itineraries/${userId}`, {
+        headers: { Authorization: `Bearer ${token}` },
       });
+      if (!response.ok) {
+        throw new Error("Falha ao buscar os planos de viagem.");
+      }
+      const data: ApiItinerary[] = await response.json();
+      const now = new Date();
+      const upcoming: ApiItinerary[] = [];
+      const history: ApiItinerary[] = [];
+
+      data.forEach((plan) => {
+        if (new Date(plan.startDate) >= now) {
+          upcoming.push(plan);
+        } else {
+          history.push(plan);
+        }
+      });
+      const formatPlan = (plan: ApiItinerary, faded = false): TravelPlan => ({
+        id: plan.id,
+       title: plan.title,
+       users: plan.users || [],
+       date: new Date(plan.startDate).toLocaleDateString("pt-BR"),
+       daysLeft: Math.max(
+          0,
+          Math.ceil(
+      (new Date(plan.startDate).getTime() - now.getTime()) /
+        (1000 * 60 * 60 * 24)
+    )
+  ),
+  faded,
+});
+
+      setTravelPlans(upcoming.map((p) => formatPlan(p)));
+      setTravelHistory(history.map((p) => formatPlan(p, true)));
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Ocorreu um erro desconhecido."
+      );
+      console.error("Erro ao buscar planos:", err);
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
+  useEffect(() => {
+    fetchTravelPlans();
+  }, [fetchTravelPlans]);
+
+ const handleConfirmLink = async () => {
+  const token = getAuthToken();
+  const userId = localStorage.getItem("userId");
+
+  if (!token || !userId) {
+    setError("Autenticação necessária. Por favor, faça login novamente.");
+    return;
+  }
+
+  try {
+    const match = linkInput.match(/(\d+)$/); 
+    const itineraryId = match ? match[1] : null;
+
+    if (!itineraryId) {
+      setError("Link inválido. Certifique-se de colar o link correto.");
+      return;
+    }
+
+    const response = await fetch(
+      `http://localhost:3000/itineraries/${itineraryId}/users/${userId}`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.message || "Falha ao entrar no plano de viagem.");
+    }
+
+    alert("Você entrou com sucesso no plano de viagem!");
+    setShowModal(false);
+    setLinkInput("");
+    fetchTravelPlans(); 
+
+  } catch (err) {
+    setError(err instanceof Error ? err.message : "Ocorreu um erro.");
+    console.error("Erro ao entrar com link:", err);
+  }
+};
   return (
     <div className="plano-viagens-bg">
       <Navbar />
       <div className="plano-viagens-container">
         <div className="plano-viagens-actions">
-          <button className="btn-primary">+ Criar um novo plano de viagem</button>
-          <button className="btn-outline">Entrar com Link</button>
+          <div className="primary-navigate-button-container">
+            <NavigateButton
+              to="/criar-plano"
+              label="+ Criar um novo plano de viagem"
+            />
+          </div>
+          <button className="btn-outline" onClick={() => setShowModal(true)}>
+            Entrar com Link
+          </button>
         </div>
 
-        <h2 className="plano-viagens-section-title">Seus planos de viagens</h2>
-        <div className="plano-viagens-cards">
-          {travelPlans.map((plan, idx) => (
-            <TravelPlanCard key={idx} {...plan} />
-          ))}
-        </div>
+        {isLoading && <p>Carregando planos</p>}
+        {error && <p style={{ color: "red" }}>{error}</p>}
 
-        <h2 className="plano-viagens-section-title">Histórico de planos de viagens</h2>
-        <div className="plano-viagens-cards">
-          {travelHistory.map((plan, idx) => (
-            <TravelPlanCard key={idx} {...plan} />
-          ))}
-        </div>
+        {!isLoading && !error && (
+          <>
+            <h2 className="plano-viagens-section-title">Seus planos de viagens</h2>
+           <div className="plano-viagens-cards">
+             {travelPlans.length > 0 ? (
+            travelPlans.map((plan, idx) => (
+            <TravelPlanCard key={idx} {...plan} itineraryId={plan.id} />
+           ))
+           ) : (
+    <p>Você não tem nenhuma viagem planejada.</p>
+  )}
+</div>
+
+            <h2 className="plano-viagens-section-title">Histórico de planos de viagens</h2>
+            <div className="plano-viagens-cards">
+              {travelHistory.length > 0 ? (
+                travelHistory.map((plan, idx) => (
+               <TravelPlanCard key={idx} {...plan} itineraryId={plan.id} />
+                ))
+              ) : (
+                <p>Nenhuma viagem no seu histórico ainda.</p>
+              )}
+            </div>
+          </>
+        )}
       </div>
+
+      {showModal && (
+        <Modal
+          title="Insira o link do plano de viagem"
+          inputValue={linkInput}
+          onInputChange={setLinkInput}
+          onConfirm={handleConfirmLink}
+          onCancel={() => setShowModal(false)}
+        />
+      )}
     </div>
   );
 };

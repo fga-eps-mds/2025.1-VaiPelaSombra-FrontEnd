@@ -12,7 +12,7 @@ interface AppProviderProps {
 }
 
 export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
-  const [theme, setTheme] = useState<string>('<<<LIGHT>>>') 
+  const [theme, setTheme] = useState<string>('<<<LIGHT>>>')
 
   return (
     <AppContext.Provider value={{ theme, setTheme }}>
@@ -20,8 +20,10 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     </AppContext.Provider>
   )
 }
-
+/* eslint-disable react-refresh/only-export-components */
 export const useAppContext = (): AppContextType => {
+/* eslint-enable react-refresh/only-export-components */
+
   const context = useContext(AppContext)
   if (!context) {
     throw new Error('useAppContext must be used within an AppProvider')
