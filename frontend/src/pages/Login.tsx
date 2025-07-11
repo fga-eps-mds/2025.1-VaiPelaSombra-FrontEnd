@@ -4,7 +4,7 @@ import imagem4 from '../assets/imagem4.jpg';
 import Umbrella from '../assets/umbrella.svg';
 import EyeToggle from '../components/ui/eye_toggle';
 import estilo from '../assets/estilo.png';
-//import config from '../config';
+//import {config} from '../config';
 import { useAuth } from "../context/AuthContext";
 
 function Login() {

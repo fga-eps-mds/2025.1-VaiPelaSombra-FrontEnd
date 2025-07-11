@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Navbar from "../components/NavBar.tsx";
 import ImagemFundo3 from "../assets/ImagemFundo3.jpeg"
 import axios from "axios";
-import config from "../config";
+import {config} from "../config";
 
 interface Destination {
   id: number;
