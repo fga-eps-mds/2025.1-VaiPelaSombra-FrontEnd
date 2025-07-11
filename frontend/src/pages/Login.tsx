@@ -4,7 +4,7 @@ import imagem4 from '../assets/imagem4.jpg';
 import Umbrella from '../assets/umbrella.svg';
 import EyeToggle from '../components/ui/eye_toggle';
 import estilo from '../assets/estilo.png';
-import config from '../config';
+//import config from '../config';
 import { useAuth } from "../context/AuthContext";
 
 function Login() {
@@ -46,23 +46,23 @@ function Login() {
     return valid;
   };
 
-  const autenticarUsuario = async () => {
-    const response = await fetch(`${config.apiBaseUrl}/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password}),
-    });
+//  const autenticarUsuario = async () => {
+//   const response = await fetch(`${config.apiBaseUrl}/login`, {
+//      method: "POST",
+//      headers: { "Content-Type": "application/json" },
+//      body: JSON.stringify({ email, password}),
+//    });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || "Erro ao fazer login.");
-    }
+//    if (!response.ok) {
+//      const errorData = await response.json();
+//      throw new Error(errorData.message || "Erro ao fazer login.");
+//    }
 
     //parte JWT q é token web JS
-    const data = await response.json();
-    localStorage.setItem("token", data.token);
-    navigate("/home");
-  };
+//    const data = await response.json();
+//    localStorage.setItem("token", data.token);
+//    navigate("/home");
+//  };
 
   const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
