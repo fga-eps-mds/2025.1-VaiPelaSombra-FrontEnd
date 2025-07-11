@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Navbar from "../components/NavBar";
 import "./Plano-Viagens.css";
+import { config } from "../config";
 
 interface UpdateItineraryPayload {
   title: string;
@@ -35,7 +36,7 @@ const EditarItinerario: React.FC = () => {
   const fetchItinerary = async () => {
     try {
       const userId = localStorage.getItem("userId");
-      const response = await fetch(`http://localhost:3000/itineraries/${userId}`, {
+      const response = await fetch(`${config.apiBaseUrl}/itineraries/${userId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const itineraries = await response.json();
@@ -77,7 +78,7 @@ const EditarItinerario: React.FC = () => {
 
     try {
       setIsLoading(true);
-      const response = await fetch(`http://localhost:3000/itineraries/${itineraryId}`, {
+      const response = await fetch(`${config.apiBaseUrl}/itineraries/${itineraryId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
