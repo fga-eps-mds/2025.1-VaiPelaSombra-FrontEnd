@@ -15,6 +15,7 @@ import { Button } from "../ui/button";
 import { z } from "zod";
 import { toast } from "sonner";
 import { CircleCheckIcon } from "lucide-react";
+import axios from "axios";
 
 
 export default function RecoverPasswordForm() {
@@ -27,9 +28,21 @@ export default function RecoverPasswordForm() {
     });
 
     function onSubmit(data: z.infer<typeof RecoverPasswordSchema>) {
-        //Chamar o endpoint que faz a recuperação de senha enviando o email no corpo
-        toast(JSON.stringify(data), {
-            icon: <CircleCheckIcon className="text-emerald-500 w-5 h-5" />,
+        const payload = {
+            email: data.email,
+        }
+        axios.get("http://localhost:3000/email/sendRecoveryEmail", {
+            params: payload,
+        })
+        .then(response => {
+            toast("Email enviado com sucesso", {
+                icon: <CircleCheckIcon className="text-emerald-500 w-5 h-5" />,
+            });
+            console.log(response.data);
+        })
+        .catch(error => {
+            const msg = error.response?.data?.message || "Erro ao enviar email.";
+            toast(msg, { icon: "❌" });
         });
     }
 

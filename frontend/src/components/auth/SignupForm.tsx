@@ -15,6 +15,7 @@ import { Button } from "../ui/button";
 import { toast } from "sonner";
 import { CircleCheckIcon } from "lucide-react";
 import { z } from "zod";
+import axios from "axios";
 
 export default function SignupForm() {
 
@@ -30,9 +31,26 @@ export default function SignupForm() {
 
         function onSubmit(data: z.infer<typeof SignupSchema>) {
             // dados para o backend
-            toast(JSON.stringify(data), {
-                icon: <CircleCheckIcon className="text-emerald-500 w-5 h-5" />,
-            });
+            const payload = {
+                name: data.fullname,
+                email: data.email,
+                password: data.password,
+                profileBio: "string",
+                profileImage: "https://example.com/profile.jpg"
+            }
+
+            axios.post("http://localhost:3000/users", payload)
+                .then(response => {
+                    toast("Usuário cadastrado com sucesso!", {
+                        icon: <CircleCheckIcon className="text-emerald-500 w-5 h-5" />,
+                    });
+                    console.log(response.data);
+                    // Aqui você pode redirecionar ou limpar o formulário se quiser
+                })
+                .catch(error => {
+                    const msg = error.response?.data?.message || "Erro ao cadastrar usuário.";
+                    toast(msg, { icon: "❌" });
+                });
         }
 
     return (
