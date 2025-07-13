@@ -3,6 +3,12 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import EditarItinerario from '../pages/EditarItinerario';
 
+jest.mock('../config/index.ts', () => ({
+  config: {
+    apiBaseUrl: 'http://localhost:3000',
+  },
+}));
+
 const mockNavigate = jest.fn();
 global.fetch = jest.fn();
 jest.mock('../components/NavBar', () => () => <div data-testid="navbar" />);
