@@ -9,66 +9,66 @@ export type Transporte = {
   itineraryId: number;
 };
 
-const transportesMock: Transporte[] = [
-  {
-    id: 1,
-    type: "Avião",
-    cost: 1200,
-    departure: "2025-08-01T08:00",
-    arrival: "2025-08-01T10:00",
-    duration: "2h",
-    description: "Voo direto",
-    itineraryId: 1,
-  },
-  {
-    id: 2,
-    type: "Ônibus",
-    cost: 200,
-    departure: "2025-08-05T08:00",
-    arrival: "2025-08-05T14:00",
-    duration: "6h",
-    description: "Viagem de ônibus",
-    itineraryId: 1,
-  },
-];
+const API_BASE_URL = "http://localhost:3000/api";
 
-let nextId = 3;
-
-export async function fetchTransportes(): Promise<Transporte[]> {
-  return new Promise((resolve) => {
-    setTimeout(() => resolve([...transportesMock]), 500);
+// GET /transport
+export async function fetchTransportes(token: string): Promise<Transporte[]> {
+  const res = await fetch(`${API_BASE_URL}/transport`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
   });
+
+  if (!res.ok) throw new Error("Erro ao buscar transportes");
+  return res.json();
 }
 
-export async function criarTransporte(data: Transporte): Promise<Transporte> {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const novo = { ...data, id: nextId++ };
-      transportesMock.push(novo);
-      resolve(novo);
-    }, 500);
+// POST /transport
+export async function criarTransporte(token: string, novo: Transporte): Promise<Transporte> {
+  const res = await fetch(`${API_BASE_URL}/transport`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(novo),
   });
+
+  if (!res.ok) {
+    const data = await res.json();
+    throw new Error(data.message || "Erro ao criar transporte");
+  }
+
+  return res.json();
 }
 
-export async function atualizarTransporte(id: number, data: Transporte): Promise<Transporte> {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      const index = transportesMock.findIndex((t) => t.id === id);
-      if (index === -1) return reject(new Error("Transporte não encontrado"));
-      const atualizado = { ...transportesMock[index], ...data };
-      transportesMock[index] = atualizado;
-      resolve(atualizado);
-    }, 500);
+// DELETE /transport/:id
+export async function deletarTransporte(token: string, id: number): Promise<void> {
+  const res = await fetch(`${API_BASE_URL}/transport/${id}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
   });
+
+  if (!res.ok) throw new Error("Erro ao deletar transporte");
 }
 
-export async function deletarTransporte(id: number): Promise<void> {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      const index = transportesMock.findIndex((t) => t.id === id);
-      if (index === -1) return reject(new Error("Transporte não encontrado"));
-      transportesMock.splice(index, 1);
-      resolve();
-    }, 500);
+// PUT /transport/:id
+export async function atualizarTransporte(token: string, id: number, data: Transporte): Promise<Transporte> {
+  const res = await fetch(`${API_BASE_URL}/transport/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
   });
+
+  if (!res.ok) {
+    const erro = await res.json();
+    throw new Error(erro.message || "Erro ao atualizar transporte");
+  }
+
+  return res.json();
 }

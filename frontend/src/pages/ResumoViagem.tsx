@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
+import { useParams } from "react-router-dom";
 import Navbar from "../components/NavBar";
 import "./ResumoViagem.css";
-
 import {
   fetchTransportes,
   criarTransporte,
@@ -10,9 +10,8 @@ import {
   Transporte,
 } from "../api/transportApi";
 
-const ITINERARY_ID_FIXO = 1;
-
 function ResumoViagem() {
+  const { itineraryId } = useParams<{ itineraryId: string }>();
   const [aba, setAba] = useState("checklist");
   const [transportes, setTransportes] = useState<Transporte[]>([]);
   const [novoTransporte, setNovoTransporte] = useState<Partial<Transporte>>({
@@ -22,36 +21,43 @@ function ResumoViagem() {
     arrival: "",
     duration: "",
     description: "",
-    itineraryId: ITINERARY_ID_FIXO,
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [editandoId, setEditandoId] = useState<number | null>(null);
   const [transporteEditado, setTransporteEditado] = useState<Partial<Transporte>>({});
 
-  // Carregar transportes ao montar
-  useEffect(() => {
-    carregarTransportes();
-  }, []);
-
-  async function carregarTransportes() {
+  const carregarTransportes = useCallback(async () => {
+    if (!itineraryId) return;
     setLoading(true);
     setError(null);
     try {
-      const dados = await fetchTransportes();
-      setTransportes(dados.filter(t => t.itineraryId === ITINERARY_ID_FIXO));
+      const token = localStorage.getItem("authToken");
+      if (!token) throw new Error("Token não encontrado");
+
+      const dados = await fetchTransportes(token);
+      const idNum = Number(itineraryId);
+      setTransportes(dados.filter((t) => t.itineraryId === idNum));
     } catch (err) {
       setError("Erro ao carregar transportes");
       console.error(err);
     } finally {
       setLoading(false);
     }
-  }
+  }, [itineraryId]);
 
-  // Adicionar transporte
+  useEffect(() => {
+    carregarTransportes();
+  }, [carregarTransportes]);
+
   async function handleAddTransporte(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    const idNum = Number(itineraryId);
+    if (isNaN(idNum)) {
+      setError("ID da viagem inválido");
+      return;
+    }
 
     if (!novoTransporte.type) {
       setError("O campo 'Tipo' é obrigatório.");
@@ -64,12 +70,16 @@ function ResumoViagem() {
     }
 
     try {
-      const criado = await criarTransporte({
+      const token = localStorage.getItem("authToken");
+      if (!token) throw new Error("Token não encontrado");
+
+      const criado = await criarTransporte(token, {
         ...novoTransporte,
-        itineraryId: ITINERARY_ID_FIXO,
+        itineraryId: idNum,
         cost: novoTransporte.cost!,
       } as Transporte);
-      setTransportes(old => [...old, criado]);
+
+      setTransportes((old) => [...old, criado]);
       setNovoTransporte({
         type: "",
         cost: 0,
@@ -77,7 +87,6 @@ function ResumoViagem() {
         arrival: "",
         duration: "",
         description: "",
-        itineraryId: ITINERARY_ID_FIXO,
       });
     } catch (err) {
       setError("Erro ao adicionar transporte");
@@ -85,39 +94,41 @@ function ResumoViagem() {
     }
   }
 
-  // Deletar transporte
   async function handleDeletar(id?: number) {
     if (!id) return;
     if (!window.confirm("Confirma exclusão do transporte?")) return;
     setError(null);
     try {
-      await deletarTransporte(id);
-      setTransportes(old => old.filter(t => t.id !== id));
+      const token = localStorage.getItem("authToken");
+      if (!token) throw new Error("Token não encontrado");
+
+      await deletarTransporte(token, id);
+      setTransportes((old) => old.filter((t) => t.id !== id));
     } catch (err) {
       setError("Erro ao deletar transporte");
       console.error(err);
     }
   }
 
-  // Iniciar edição
   function iniciarEdicao(t: Transporte) {
     setEditandoId(t.id || null);
     setTransporteEditado({ ...t });
   }
 
-  // Cancelar edição
   function cancelarEdicao() {
     setEditandoId(null);
     setTransporteEditado({});
   }
 
-  // Salvar edição
   async function salvarEdicao() {
     if (!editandoId) return;
     setError(null);
     try {
-      const atualizado = await atualizarTransporte(editandoId, transporteEditado as Transporte);
-      setTransportes(old => old.map(t => (t.id === editandoId ? atualizado : t)));
+      const token = localStorage.getItem("authToken");
+      if (!token) throw new Error("Token não encontrado");
+
+      const atualizado = await atualizarTransporte(token, editandoId, transporteEditado as Transporte);
+      setTransportes((old) => old.map((t) => (t.id === editandoId ? atualizado : t)));
       cancelarEdicao();
     } catch (err) {
       setError("Erro ao atualizar transporte");
@@ -154,7 +165,7 @@ function ResumoViagem() {
               <input
                 placeholder="Tipo (ex: Avião, Ônibus)"
                 value={novoTransporte.type || ""}
-                onChange={e => setNovoTransporte({ ...novoTransporte, type: e.target.value })}
+                onChange={(e) => setNovoTransporte({ ...novoTransporte, type: e.target.value })}
                 required
               />
               <input
@@ -162,28 +173,28 @@ function ResumoViagem() {
                 type="number"
                 min={0}
                 value={novoTransporte.cost !== undefined ? novoTransporte.cost : ""}
-                onChange={e => setNovoTransporte({ ...novoTransporte, cost: Number(e.target.value) })}
+                onChange={(e) => setNovoTransporte({ ...novoTransporte, cost: Number(e.target.value) })}
                 required
               />
               <input
                 type="datetime-local"
                 value={novoTransporte.departure || ""}
-                onChange={e => setNovoTransporte({ ...novoTransporte, departure: e.target.value })}
+                onChange={(e) => setNovoTransporte({ ...novoTransporte, departure: e.target.value })}
               />
               <input
                 type="datetime-local"
                 value={novoTransporte.arrival || ""}
-                onChange={e => setNovoTransporte({ ...novoTransporte, arrival: e.target.value })}
+                onChange={(e) => setNovoTransporte({ ...novoTransporte, arrival: e.target.value })}
               />
               <input
                 placeholder="Duração"
                 value={novoTransporte.duration || ""}
-                onChange={e => setNovoTransporte({ ...novoTransporte, duration: e.target.value })}
+                onChange={(e) => setNovoTransporte({ ...novoTransporte, duration: e.target.value })}
               />
               <input
                 placeholder="Descrição"
                 value={novoTransporte.description || ""}
-                onChange={e => setNovoTransporte({ ...novoTransporte, description: e.target.value })}
+                onChange={(e) => setNovoTransporte({ ...novoTransporte, description: e.target.value })}
               />
               <button type="submit">Adicionar</button>
             </form>
@@ -201,13 +212,13 @@ function ResumoViagem() {
                 </tr>
               </thead>
               <tbody>
-                {transportes.map(t =>
+                {transportes.map((t) =>
                   editandoId === t.id ? (
                     <tr key={t.id}>
                       <td>
                         <input
                           value={transporteEditado.type || ""}
-                          onChange={e => setTransporteEditado({ ...transporteEditado, type: e.target.value })}
+                          onChange={(e) => setTransporteEditado({ ...transporteEditado, type: e.target.value })}
                         />
                       </td>
                       <td>
@@ -215,33 +226,33 @@ function ResumoViagem() {
                           type="number"
                           min={0}
                           value={transporteEditado.cost !== undefined ? transporteEditado.cost : ""}
-                          onChange={e => setTransporteEditado({ ...transporteEditado, cost: Number(e.target.value) })}
+                          onChange={(e) => setTransporteEditado({ ...transporteEditado, cost: Number(e.target.value) })}
                         />
                       </td>
                       <td>
                         <input
                           type="datetime-local"
                           value={transporteEditado.departure || ""}
-                          onChange={e => setTransporteEditado({ ...transporteEditado, departure: e.target.value })}
+                          onChange={(e) => setTransporteEditado({ ...transporteEditado, departure: e.target.value })}
                         />
                       </td>
                       <td>
                         <input
                           type="datetime-local"
                           value={transporteEditado.arrival || ""}
-                          onChange={e => setTransporteEditado({ ...transporteEditado, arrival: e.target.value })}
+                          onChange={(e) => setTransporteEditado({ ...transporteEditado, arrival: e.target.value })}
                         />
                       </td>
                       <td>
                         <input
                           value={transporteEditado.duration || ""}
-                          onChange={e => setTransporteEditado({ ...transporteEditado, duration: e.target.value })}
+                          onChange={(e) => setTransporteEditado({ ...transporteEditado, duration: e.target.value })}
                         />
                       </td>
                       <td>
                         <input
                           value={transporteEditado.description || ""}
-                          onChange={e => setTransporteEditado({ ...transporteEditado, description: e.target.value })}
+                          onChange={(e) => setTransporteEditado({ ...transporteEditado, description: e.target.value })}
                         />
                       </td>
                       <td>

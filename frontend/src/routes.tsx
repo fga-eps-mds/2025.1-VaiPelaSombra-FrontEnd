@@ -24,6 +24,7 @@ function AppRoutes() {
         <Route path='/destination-info' element={<DestinationInfo/>} />
         <Route path="/recover-password" element={<RecoverPassword />} />
         <Route path='/resumo-viagem' element={<ResumoViagem />} />
+        <Route path="/resumo-viagem/:itineraryId" element={<ResumoViagem />} />
       </Routes>
     </Router>
   );
