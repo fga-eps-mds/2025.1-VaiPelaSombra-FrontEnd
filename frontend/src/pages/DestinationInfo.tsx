@@ -1,314 +1,171 @@
 import { Button } from "@/components/ui/button";
-import { toast, Toaster } from "sonner";
-import { Heart, SquareArrowOutUpRight, CalendarPlus, ChevronDownIcon, BookmarkPlus, Bookmark } from "lucide-react";
-import { Tabs,TabsContent,TabsList,TabsTrigger,} from "@/components/ui/tabs"
-import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,} from "@/components/ui/dropdown-menu"
-import { Dialog,DialogClose,DialogContent,DialogFooter,DialogHeader,DialogTitle,} from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import React, { useState, useEffect } from "react";
-import { DropdownMenuCheckboxItemProps } from "@radix-ui/react-dropdown-menu"
-import { useParams } from 'react-router-dom';
-import { Destination, NewList } from '../destination'; 
+import { Toaster } from "sonner";
+import { CalendarPlus, Info, BookOpen } from "lucide-react";
+import { Tabs,TabsContent, TabsList, TabsTrigger,} from "@/components/ui/tabs";
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { config } from "@/config";
 
+interface Destination {
+    id: number;
+    title: string;
+    locationName: string;
+    description: string;
+    localClimate?: string;
+    timeZone?: string;
+    latitude: number;
+    longitude: number;
+}
 
-type Checked = DropdownMenuCheckboxItemProps["checked"]
+interface DestinationImage {
+    id: number;
+    url: string;
+}
 
 export default function DestinationInfo() {
-    const { destinationId } = useParams<{ destinationId: string }>();
+    const { id } = useParams<{ id: string }>();
+    const navigate = useNavigate();
 
-    const [destination, setDestination] = useState<Destination | null>(null); 
-    const [isLoadingDestination, setIsLoadingDestination] = useState(true);
-    const [destinationError, setDestinationError] = useState<string | null>(null);
-
-    const [isSaved, setIsSaved] = useState<Checked>(false);
-
-    const [newListName, setNewListName] = useState("");
-    const [isCreateListDialogOpen, setIsCreateListDialogOpen] = useState(false); 
-    const [isCreatingList, setIsCreatingList] = useState(false); 
+    const [destination, setDestination] = useState<Destination | null>(null);
+    const [images, setImages] = useState<DestinationImage[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        if (!destinationId) {
-            setDestinationError("ID do destino não fornecido na URL.");
-            setIsLoadingDestination(false);
-            return;
-        }
+        if (!id) return;
 
-        const fetchDestinationDetails = async () => {
+        const fetchDestinationData = async () => {
+            setLoading(true);
+            setError(null);
             try {
-                setIsLoadingDestination(true);
-                setDestinationError(null); 
-                const response = await fetch(`http://localhost:3000/destinations/${destinationId}`); 
+                const [destinationResponse, imagesResponse] = await Promise.all([
+                    fetch(`${config.apiBaseUrl}/destinations/${id}`),
+                    fetch(`${config.apiBaseUrl}/destinations/${id}/images`)
+                ]);
 
-                if (!response.ok) {
-                    throw new Error(`Erro ao buscar destino: ${response.status} - ${response.statusText}`);
+                if (!destinationResponse.ok || !imagesResponse.ok) {
+                    throw new Error("Falha ao carregar dados do destino.");
                 }
 
-                const data: Destination = await response.json();
+                const destinationData: Destination = await destinationResponse.json();
+                const imagesData: DestinationImage[] = await imagesResponse.json();
 
-                setDestination(data);
-                setIsSaved(data.isFavorited || false); 
+                setDestination(destinationData);
+                setImages(imagesData);
 
-            } catch (error) {
-                console.error("Erro ao carregar detalhes do destino:", error); 
-                setDestinationError("Não foi possível carregar os detalhes do destino. Tente novamente.");
+            } catch (err) {
+                if (err instanceof Error) {
+                    setError(err.message);
+                } else {
+                    setError("Ocorreu um erro desconhecido.");
+                }
             } finally {
-                setIsLoadingDestination(false);
+                setLoading(false);
             }
         };
 
-        fetchDestinationDetails(); 
-    }, [destinationId]); 
-  
-    const toggleSave = async () => {
-        if (!destinationId) {
-            toast.error("Erro: ID do destino ausente para salvar/remover.");
-            return;
-        }
+        fetchDestinationData();
+    }, [id]);
 
-        const newSavedState = !isSaved; 
+    const planTrip = () => navigate('/criar-plano');
 
-        try {
-            setIsSaved(newSavedState);
-
-            const response = await fetch(`http://localhost:3000/destinations/${destinationId}/favorite`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json', 
-                },
-                body: JSON.stringify({
-                    isFavorited: newSavedState,  
-                }),
-            });
-
-            if (!response.ok) {
-                setIsSaved(!newSavedState); 
-                throw new Error(`Erro ao ${newSavedState ? 'salvar' : 'remover'} destino.`);
-            }
-
-            if (newSavedState) {
-                toast.success("Destino salvo com sucesso!");
-            } else {
-                toast.info("Destino removido dos salvos.");
-            }
-
-        } catch (error) {
-            console.error("Erro ao favoritar/desfavoritar destino:", error); 
-            setIsSaved(!newSavedState); 
-            toast.error(`Falha ao ${newSavedState ? 'salvar' : 'remover'} destino. Tente novamente.`);
-        }
-    };
-
-    const handleCreateNewList = async () => {
-        if (newListName.trim() === "") { 
-            toast.error("O nome da lista não pode estar vazio.");
-            return;
-        }
-
-        try {
-            setIsCreatingList(true); 
-            const response = await fetch(`http://localhost:3000/lists`, {
-                method: 'POST', 
-                headers: {
-                    'Content-Type': 'application/json',
-            },
-                body: JSON.stringify({
-                    name: newListName,
-                
-                }),
-            });
-
-            if (!response.ok) {
-                throw new Error(`Erro ao criar lista: ${response.status} - ${response.statusText}`);
-            }
-
-            const newList: NewList = await response.json(); 
-            toast.success(`Lista "${newListName}" criada com sucesso!`);
-            setNewListName(""); 
-            setIsCreateListDialogOpen(false); 
-        } catch (error) {
-            console.error("Erro ao criar lista:", error);
-            toast.error(`Falha ao criar lista. Tente novamente.`);
-        } finally {
-            setIsCreatingList(false);
-        }
-    };
-
-    if (isLoadingDestination) {
-        return <main className="m-10 w-screen max-w-screen-xl xl:mx-auto"><div>Carregando detalhes do destino...</div></main>;
+    if (loading) {
+        return (
+            <div className="m-10">
+                <div className="text-center p-20 font-mono">
+                    Carregando destino...
+                </div>
+            </div>
+        );
     }
 
-    if (destinationError) {
-        return <main className="m-10 w-screen max-w-screen-xl xl:mx-auto"><div>Erro: {destinationError}</div></main>;
+    if (error) {
+        return (
+            <div className="m-10">
+                <div className="text-center p-20 font-mono">
+                    <span className="text-red-500">{error}</span>
+                </div>
+            </div>
+        );
     }
 
     if (!destination) {
-        return <main className="m-10 w-screen max-w-screen-xl xl:mx-auto"><div>Nenhum destino encontrado para este ID.</div></main>;
+        return (
+            <div className="m-10">
+                <div className="text-center p-20 font-mono">
+                    Destino não encontrado.
+                </div>
+            </div>
+        );
     }
 
     return (
-        <main className="m-10 w-screen max-w-screen-xl xl:mx-auto">
-            <section className="flex justify-between">
+        <div className="m-10 w-screen max-w-screen-xl xl:mx-auto">
+            <section className="flex justify-between items-center">
                 <div>
-                    <h1 className="text-3xl font-mono font-extrabold">{destination.name}</h1>
-                    <h4 className="text-gray-600">{destination.location}</h4>
+                    <h1 className="text-3xl font-mono font-extrabold">{destination.title}</h1>
+                    <h4 className="text-gray-600 text-lg">{destination.locationName}</h4>
                 </div>
-                <div className="flex justify-between w-104">
-                    <Button className="cursor-pointer" variant="outline" onClick={() => toast.info("Funcionalidade 'Ver Mais' futura.")}>
-                        <SquareArrowOutUpRight />Ver Mais
-                    </Button>
-                    <div className="inline-flex -space-x-px rounded-md rtl:space-x-reverse">
-                        <Button className="rounded-none shadow-none first:rounded-s-md last:rounded-e-md focus-visible:z-10 cursor-pointer" variant="outline" onClick={toggleSave}>
-                            <Heart
-                                className={`transition-colors duration-150 ${isSaved ? 'text-red-500' : 'text-current'}`}
-                                fill={isSaved ? 'currentColor' : 'none'}
-                            />
-                            {isSaved ? 'Salvo' : 'Salvar'} 
-                        </Button>
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button
-                                    className="rounded-none shadow-none first:rounded-s-md last:rounded-e-md focus-visible:z-10 cursor-pointer"
-                                    variant="outline"
-                                    size="icon"
-                                    aria-label="Open link"
-                                >
-                                    <ChevronDownIcon size={16} aria-hidden="true" />
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent>
-                                <DropdownMenuCheckboxItem
-                                    checked={isSaved}
-                                    onCheckedChange={toggleSave}
-                                    className="[&>span:first-child]:hidden pl-2"
-                                >
-                                    <Bookmark
-                                        size={16} aria-hidden="true" className={`text-black transition-colors duration-150 ${isSaved ? 'text-red-500' : 'text-current'}`}
-                                        fill={isSaved ? 'currentColor' : 'none'} />
-                                    Favoritos
-                                </DropdownMenuCheckboxItem>
-                                {/* Estas são placeholders. Você precisará de lógica no backend e frontend para gerenciar listas reais */}
-                                <DropdownMenuCheckboxItem
-                                    checked={false} 
-                                    className="[&>span:first-child]:hidden pl-2"
-                                >
-                                    <Bookmark size={16} aria-hidden="true" className="text-black" />
-                                    Rumo a Xique-Xique
-                                </DropdownMenuCheckboxItem>
-                                <DropdownMenuCheckboxItem
-                                    checked={false}
-                                    className="[&>span:first-child]:hidden pl-2"
-                                >
-                                    <Bookmark size={16} aria-hidden="true" className="text-black" />
-                                    RockInRio2077
-                                </DropdownMenuCheckboxItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem onSelect={() => setIsCreateListDialogOpen(true)}><BookmarkPlus size={16} className="text-black" aria-hidden="true" />Criar nova lista</DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                    </div>
-                    <Button className="cursor-pointer">
-                        <CalendarPlus />Planejar Viagem
+                <div>
+                    <Button onClick={planTrip}>
+                        <CalendarPlus className="mr-2 h-4 w-4" />
+                        Planejar Viagem
                     </Button>
                 </div>
             </section>
+
             <section className="mt-5">
-                <div className="flex">
-                    <div className="w-1/2 bg-gray-300 h-100 mr-2 rounded-md">
-                        <img
-                            src={destination.imageUrlMain}
-                            alt={destination.name}        
-                            className="w-full h-full object-cover rounded-md"
-                        />
+                <div className="flex h-[400px]">
+                    <div className="w-1/2 bg-gray-200 mr-2 rounded-md">
+                        {images.length > 0 && <img src={`${config.apiBaseUrl}${images[0].url}`} alt={`Imagem principal de ${destination.title}`} className="w-full h-full object-cover rounded-md"/>}
                     </div>
-                    <div className="grid grid-cols-2 gap-4 w-1/2 bg-white h-100 ml-2">
-                        {destination.imageUrlsGallery && destination.imageUrlsGallery.map((url, index) => (
-                            <div key={index} className="bg-gray-300 rounded-md h-full w-full overflow-hidden">
-                                <img
-                                    src={url} 
-                                    alt={`${destination.name} - Imagem ${index + 1}`} 
-                                    className="w-full h-full object-cover rounded-md"
-                                />
+                    <div className="grid grid-cols-2 gap-4 w-1/2 ml-2">
+                        {images.slice(1, 5).map(image => (
+                            <div key={image.id} className="bg-gray-200 rounded-md h-full w-full overflow-hidden">
+                                <img src={`${config.apiBaseUrl}${image.url}`} alt={`Imagem de ${destination.title}`} className="w-full h-full object-cover rounded-md"/>
                             </div>
                         ))}
                     </div>
                 </div>
             </section>
-            <section className="flex mt-10 w-full">
-                <Tabs defaultValue="tab-1" orientation="vertical" className="w-full">
-                    <TabsList>
-                        <TabsTrigger value="tab-1" className="cursor-pointer">Visao Geral</TabsTrigger>
-                        <TabsTrigger value="tab-2" className="cursor-pointer">Hospedagens</TabsTrigger>
-                        <TabsTrigger value="tab-3" className="cursor-pointer">Pontos Turisticos</TabsTrigger>
-                        <TabsTrigger value="tab-4" className="cursor-pointer">Restaurantes</TabsTrigger>
-                    </TabsList>
-                    <TabsContent value="tab-1">
-                        <section className="w-full h-100 mr-2">
-                            <h2 className="text-2xl font-mono font-extrabold">Sobre {destination.name}</h2>
-                            <p className="text-gray-800 break-words mt-2">
-                                {destination.description}
-                            </p>
-                        </section>
-                    </TabsContent>
-                    <TabsContent value="tab-2">
-                        <section className="w-full h-100 mr-2">
-                            Tab 2 (Hospedagens) - O conteúdo aqui também viria do backend
-                        </section>
-                    </TabsContent>
-                    <TabsContent value="tab-3">
-                        <section className="w-full h-100 mr-2">
-                            Tab 3 (Pontos Turísticos) - O conteúdo aqui também viria do backend
-                        </section>
-                    </TabsContent>
-                    <TabsContent value="tab-4">
-                        <section className="w-full h-100 mr-2">
-                            Tab 4 (Restaurantes) - O conteúdo aqui também viria do backend
-                        </section>
-                    </TabsContent>
-                </Tabs>
-            </section>
 
-            <Dialog open={isCreateListDialogOpen} onOpenChange={setIsCreateListDialogOpen}>
-                <DialogContent className="w-100">
-                    <div className="flex flex-col items-start gap-2">
-                        <DialogHeader>
-                            <DialogTitle className="text-2xl font-mono font-bold">
-                                Criar uma nova lista
-                            </DialogTitle>
-                        </DialogHeader>
-                    </div>
+            <Tabs defaultValue="overview" className="mt-10 w-full">
+                <TabsList className="grid w-full grid-cols-2 md:w-[400px]">
+                    <TabsTrigger value="overview">
+                        <BookOpen className="mr-2 h-4 w-4"/> Visão Geral
+                    </TabsTrigger>
+                    <TabsTrigger value="informacoes">
+                        <Info className="mr-2 h-4 w-4"/> Informações Específicas
+                    </TabsTrigger>
+                </TabsList>
 
-                    <form className="space-y-5">
-                        <div className="*:not-first:mt-2">
-                            <Label htmlFor="newListNameInput">Nome da lista</Label> 
-                            <Input
-                                id="newListNameInput"
-                                type="text"
-                                placeholder="Digite o nome da lista"
-                                value={newListName} 
-                                onChange={(e) => setNewListName(e.target.value)} 
-                            />
+                <TabsContent value="overview" className="mt-4">
+                    <h2 className="text-2xl font-mono font-extrabold">Sobre {destination.title}</h2>
+                    <p className="text-gray-800 break-words mt-4 leading-relaxed">
+                        {destination.description}
+                    </p>
+                </TabsContent>
+
+                <TabsContent value="informacoes" className="mt-2">
+                    <h2 className="text-2xl font-mono font-extrabold">Informações</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4 p-4 border rounded-lg">
+                        <div>
+                            <p className="font-semibold text-gray-700">Clima Local</p>
+                            <p className="text-gray-900">{destination.localClimate || 'Não informado'}</p>
                         </div>
-                        <DialogFooter>
-                            <DialogClose asChild>
-                                <Button type="button" variant="outline" className="flex-1 cursor-pointer" disabled={isCreatingList}>
-                                    Cancelar
-                                </Button>
-                            </DialogClose>
-                            <Button
-                                type="button"
-                                className="flex-1 cursor-pointer"
-                                disabled={newListName.length === 0 || isCreatingList}
-                                onClick={handleCreateNewList} 
-                            >
-                                {isCreatingList ? 'Criando...' : 'Criar'}
-                            </Button>
-                        </DialogFooter>
-                    </form>
-                </DialogContent>
-            </Dialog>
+                        <div>
+                            <p className="font-semibold text-gray-700">Fuso Horário</p>
+                            <p className="text-gray-900">{destination.timeZone || 'Não informado'}</p>
+                        </div>
+                        <div>
+                            <p className="font-semibold text-gray-700">Coordenadas</p>
+                            <p className="text-gray-900">{`Latitude: ${destination.latitude}, Longitude: ${destination.longitude}`}</p>
+                        </div>
+                    </div>
+                </TabsContent>
+            </Tabs>
 
             <Toaster />
-        </main>
+        </div>
     );
 }
