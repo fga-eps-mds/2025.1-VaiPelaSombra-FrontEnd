@@ -4,7 +4,8 @@ import TravelPlanCard from "../components/TravelPlanCard";
 import Modal from "../components/ui/modal";
 import "./Plano-Viagens.css";
 import NavigateButton from "../components/NavigateButton";
-import {config} from "../config";
+import { config } from "../config";
+import { useAuth } from "../hooks/useAuth"; // ✅ Adicionar useAuth
 
 type User = {
   id: number;
@@ -28,6 +29,7 @@ type TravelPlan = {
 };
 
 const PlanoViagens: React.FC = () => {
+  const { getToken } = useAuth();
   const [travelPlans, setTravelPlans] = useState<TravelPlan[]>([]);
   const [travelHistory, setTravelHistory] = useState<TravelPlan[]>([]);
   const [showModal, setShowModal] = useState(false);
@@ -35,14 +37,10 @@ const PlanoViagens: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const getAuthToken = () => {
-    return localStorage.getItem("authToken");
-  };
-
- const fetchTravelPlans = useCallback(async () => {
+  const fetchTravelPlans = useCallback(async () => {
     setIsLoading(true);
     setError(null);
-    const token = getAuthToken();
+    const token = getToken(); // ✅ Usar hook
     const userId = localStorage.getItem("userId");
 
     if (!token || !userId) {
@@ -52,12 +50,18 @@ const PlanoViagens: React.FC = () => {
     }
 
     try {
-      const response = await fetch(`${config.apiBaseUrl}/itineraries/${userId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      // ✅ CORRIGIR: Usar endpoint que funciona no backend
+      const response = await fetch(
+        `${config.apiBaseUrl}/users/${userId}/itineraries`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
       if (!response.ok) {
         throw new Error("Falha ao buscar os planos de viagem.");
       }
+
       const data: ApiItinerary[] = await response.json();
       const now = new Date();
       const upcoming: ApiItinerary[] = [];
@@ -70,20 +74,21 @@ const PlanoViagens: React.FC = () => {
           history.push(plan);
         }
       });
+
       const formatPlan = (plan: ApiItinerary, faded = false): TravelPlan => ({
         id: plan.id,
-       title: plan.title,
-       users: plan.users || [],
-       date: new Date(plan.startDate).toLocaleDateString("pt-BR"),
-       daysLeft: Math.max(
+        title: plan.title,
+        users: plan.users || [],
+        date: new Date(plan.startDate).toLocaleDateString("pt-BR"),
+        daysLeft: Math.max(
           0,
           Math.ceil(
-      (new Date(plan.startDate).getTime() - now.getTime()) /
-        (1000 * 60 * 60 * 24)
-    )
-  ),
-  faded,
-});
+            (new Date(plan.startDate).getTime() - now.getTime()) /
+              (1000 * 60 * 60 * 24)
+          )
+        ),
+        faded,
+      });
 
       setTravelPlans(upcoming.map((p) => formatPlan(p)));
       setTravelHistory(history.map((p) => formatPlan(p, true)));
@@ -95,55 +100,56 @@ const PlanoViagens: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [getToken]); // ✅ Adicionar dependência
 
   useEffect(() => {
     fetchTravelPlans();
   }, [fetchTravelPlans]);
 
- const handleConfirmLink = async () => {
-  const token = getAuthToken();
-  const userId = localStorage.getItem("userId");
+  const handleConfirmLink = async () => {
+    const token = getToken(); // ✅ Usar hook
+    const userId = localStorage.getItem("userId");
 
-  if (!token || !userId) {
-    setError("Autenticação necessária. Por favor, faça login novamente.");
-    return;
-  }
-
-  try {
-    const match = linkInput.match(/(\d+)$/); 
-    const itineraryId = match ? match[1] : null;
-
-    if (!itineraryId) {
-      setError("Link inválido. Certifique-se de colar o link correto.");
+    if (!token || !userId) {
+      setError("Autenticação necessária. Por favor, faça login novamente.");
       return;
     }
 
-    const response = await fetch(
-      `${config.apiBaseUrl}/itineraries/${itineraryId}/users/${userId}`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+    try {
+      const match = linkInput.match(/(\d+)$/);
+      const itineraryId = match ? match[1] : null;
+
+      if (!itineraryId) {
+        setError("Link inválido. Certifique-se de colar o link correto.");
+        return;
       }
-    );
 
-    if (!response.ok) {
-      const data = await response.json();
-      throw new Error(data.message || "Falha ao entrar no plano de viagem.");
+      // ✅ Este endpoint parece correto, manter como está
+      const response = await fetch(
+        `${config.apiBaseUrl}/itineraries/${itineraryId}/users/${userId}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.message || "Falha ao entrar no plano de viagem.");
+      }
+
+      alert("Você entrou com sucesso no plano de viagem!");
+      setShowModal(false);
+      setLinkInput("");
+      fetchTravelPlans();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Ocorreu um erro.");
+      console.error("Erro ao entrar com link:", err);
     }
+  };
 
-    alert("Você entrou com sucesso no plano de viagem!");
-    setShowModal(false);
-    setLinkInput("");
-    fetchTravelPlans(); 
-
-  } catch (err) {
-    setError(err instanceof Error ? err.message : "Ocorreu um erro.");
-    console.error("Erro ao entrar com link:", err);
-  }
-};
   return (
     <div className="plano-viagens-bg">
       <Navbar />
@@ -166,21 +172,21 @@ const PlanoViagens: React.FC = () => {
         {!isLoading && !error && (
           <>
             <h2 className="plano-viagens-section-title">Seus planos de viagens</h2>
-           <div className="plano-viagens-cards">
-             {travelPlans.length > 0 ? (
-            travelPlans.map((plan, idx) => (
-            <TravelPlanCard key={idx} {...plan} itineraryId={plan.id} />
-           ))
-           ) : (
-    <p>Você não tem nenhuma viagem planejada.</p>
-  )}
-</div>
+            <div className="plano-viagens-cards">
+              {travelPlans.length > 0 ? (
+                travelPlans.map((plan, idx) => (
+                  <TravelPlanCard key={idx} {...plan} itineraryId={plan.id} />
+                ))
+              ) : (
+                <p>Você não tem nenhuma viagem planejada.</p>
+              )}
+            </div>
 
             <h2 className="plano-viagens-section-title">Histórico de planos de viagens</h2>
             <div className="plano-viagens-cards">
               {travelHistory.length > 0 ? (
                 travelHistory.map((plan, idx) => (
-               <TravelPlanCard key={idx} {...plan} itineraryId={plan.id} />
+                  <TravelPlanCard key={idx} {...plan} itineraryId={plan.id} />
                 ))
               ) : (
                 <p>Nenhuma viagem no seu histórico ainda.</p>

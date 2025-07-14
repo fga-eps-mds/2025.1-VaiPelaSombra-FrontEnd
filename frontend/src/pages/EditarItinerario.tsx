@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Navbar from "../components/NavBar";
 import "./Plano-Viagens.css";
@@ -33,17 +33,18 @@ const EditarItinerario: React.FC = () => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
-  const fetchItinerary = async () => {
+
+  const fetchItinerary = useCallback(async () => {
     try {
       const userId = localStorage.getItem("userId");
-      const response = await fetch(`${config.apiBaseUrl}/itineraries/${userId}`, {
+      const response = await fetch(`${config.apiBaseUrl}/users/${userId}/itineraries`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const itineraries = await response.json();
       const plan = itineraries.find(
-      (i: { id: number; title: string; startDate: string; endDate: string; lodgingBudget?: number; foodBudget?: number; totalBudget?: number }) =>
-        i.id === parseInt(itineraryId || "", 10)
-);
+        (i: { id: number; title: string; startDate: string; endDate: string; lodgingBudget?: number; foodBudget?: number; totalBudget?: number }) =>
+          i.id === parseInt(itineraryId || "", 10)
+      );
 
       if (plan) {
         setFormData({
@@ -58,10 +59,13 @@ const EditarItinerario: React.FC = () => {
     } catch {
       setError("Erro ao carregar dados da viagem.");
     }
-  };
+  }, [itineraryId, token]);
+
   useEffect(() => {
-    if (itineraryId && token) fetchItinerary();
-  }, [itineraryId]);
+    if (itineraryId && token) {
+      fetchItinerary();
+    }
+  }, [fetchItinerary, itineraryId, token]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

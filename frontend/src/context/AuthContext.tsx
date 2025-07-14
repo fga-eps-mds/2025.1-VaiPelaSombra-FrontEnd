@@ -3,7 +3,7 @@ import { createContext, useContext, useState, ReactNode, useEffect } from 'react
 
 
 const config = {
-  apiBaseUrl: import.meta.env.VITE_API_BASE_URL,
+  apiBaseUrl: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api',
 } as const;
 
 
@@ -22,7 +22,7 @@ interface AuthContextType {
   refresh: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -35,8 +35,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const res = await fetch(`${config.apiBaseUrl}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
       body: JSON.stringify({ email, password }),
+      credentials: 'include',
     });
     if (!res.ok) {
       const errorData = await res.json();
@@ -45,15 +45,29 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const data = await res.json();
     setAccessToken(data.accessToken);
     setUser(data.user);
+    
+    // Sincronizar com localStorage
+    localStorage.setItem("authToken", data.accessToken);
+    if (data.user?.id) {
+      localStorage.setItem("userId", data.user.id.toString());
+    }
   };
 
   const logout = async () => {
-    await fetch(`${config.apiBaseUrl}/auth/logout`, {
-      method: 'POST',
-      credentials: 'include',
-    });
-    setAccessToken(null);
-    setUser(null);
+    try {
+      await fetch(`${config.apiBaseUrl}/auth/logout`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      setAccessToken(null);
+      setUser(null);
+      // Limpar localStorage
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("userId");
+    }
   };
 
   const refresh = async () => {
@@ -65,6 +79,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const data = await res.json();
     setAccessToken(data.accessToken);
     setUser(data.user);
+    
+    // Atualizar localStorage
+    localStorage.setItem("authToken", data.accessToken);
+    if (data.user?.id) {
+      localStorage.setItem("userId", data.user.id.toString());
+    }
   };
 
   useEffect(() => {
@@ -73,6 +93,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         await refresh();
       } catch {
         console.log('No valid refresh token');
+        // Se não conseguir fazer refresh, limpar qualquer token antigo
+        localStorage.removeItem("authToken");
+        localStorage.removeItem("userId");
       } finally {
         setIsLoading(false);
       }
@@ -86,7 +109,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }
 
   return (
-    <AuthContext.Provider value={{ user, accessToken, login, logout, refresh, isAuthenticated }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      accessToken, 
+      login, 
+      logout, 
+      refresh, 
+      isAuthenticated 
+    }}>
       {children}
     </AuthContext.Provider>
   );
