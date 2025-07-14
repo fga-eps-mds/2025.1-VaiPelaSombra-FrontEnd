@@ -15,6 +15,7 @@ interface UpdateItineraryPayload {
 
 interface ItineraryData {
   id: number; 
+  title: string;
   startDate: string; 
   endDate: string;   
   lodgingBudget?: number;
