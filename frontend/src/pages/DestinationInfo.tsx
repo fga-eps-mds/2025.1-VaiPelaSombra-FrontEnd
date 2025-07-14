@@ -9,7 +9,8 @@ import { Input } from "@/components/ui/input";
 import React, { useState, useEffect } from "react";
 import { DropdownMenuCheckboxItemProps } from "@radix-ui/react-dropdown-menu"
 import { useParams } from 'react-router-dom';
-import { Destination, NewList } from '../destination';
+import { Destination, NewList } from '../destination'; 
+
 
 type Checked = DropdownMenuCheckboxItemProps["checked"]
 
@@ -37,7 +38,7 @@ export default function DestinationInfo() {
             try {
                 setIsLoadingDestination(true);
                 setDestinationError(null); 
-                const response = await fetch(`http://localhost:3000/api/destinations/${destinationId}`);
+                const response = await fetch(`http://localhost:3000/destinations/${destinationId}`); 
 
                 if (!response.ok) {
                     throw new Error(`Erro ao buscar destino: ${response.status} - ${response.statusText}`);
@@ -46,9 +47,10 @@ export default function DestinationInfo() {
                 const data: Destination = await response.json();
 
                 setDestination(data);
-                setIsSaved(data.isFavorited || false);
+                setIsSaved(data.isFavorited || false); 
 
             } catch (error) {
+                console.error("Erro ao carregar detalhes do destino:", error); 
                 setDestinationError("Não foi possível carregar os detalhes do destino. Tente novamente.");
             } finally {
                 setIsLoadingDestination(false);
@@ -69,18 +71,18 @@ export default function DestinationInfo() {
         try {
             setIsSaved(newSavedState);
 
-            const response = await fetch(`http://localhost:3000/api/favorites/toggle`, {
+            const response = await fetch(`http://localhost:3000/destinations/${destinationId}/favorite`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json', 
                 },
                 body: JSON.stringify({
-                    destinationId: parseInt(destinationId), 
-                    action: newSavedState ? 'add' : 'remove', 
+                    isFavorited: newSavedState,  
                 }),
             });
 
             if (!response.ok) {
+                setIsSaved(!newSavedState); 
                 throw new Error(`Erro ao ${newSavedState ? 'salvar' : 'remover'} destino.`);
             }
 
@@ -91,7 +93,8 @@ export default function DestinationInfo() {
             }
 
         } catch (error) {
-            setIsSaved(!newSavedState);
+            console.error("Erro ao favoritar/desfavoritar destino:", error); 
+            setIsSaved(!newSavedState); 
             toast.error(`Falha ao ${newSavedState ? 'salvar' : 'remover'} destino. Tente novamente.`);
         }
     };
@@ -104,13 +107,14 @@ export default function DestinationInfo() {
 
         try {
             setIsCreatingList(true); 
-            const response = await fetch(`http://localhost:3000/api/lists`, {
+            const response = await fetch(`http://localhost:3000/lists`, {
                 method: 'POST', 
                 headers: {
                     'Content-Type': 'application/json',
-                },
+            },
                 body: JSON.stringify({
                     name: newListName,
+                
                 }),
             });
 
@@ -120,9 +124,10 @@ export default function DestinationInfo() {
 
             const newList: NewList = await response.json(); 
             toast.success(`Lista "${newListName}" criada com sucesso!`);
-            setNewListName("");
+            setNewListName(""); 
             setIsCreateListDialogOpen(false); 
         } catch (error) {
+            console.error("Erro ao criar lista:", error);
             toast.error(`Falha ao criar lista. Tente novamente.`);
         } finally {
             setIsCreatingList(false);
@@ -182,6 +187,7 @@ export default function DestinationInfo() {
                                         fill={isSaved ? 'currentColor' : 'none'} />
                                     Favoritos
                                 </DropdownMenuCheckboxItem>
+                                {/* Estas são placeholders. Você precisará de lógica no backend e frontend para gerenciar listas reais */}
                                 <DropdownMenuCheckboxItem
                                     checked={false} 
                                     className="[&>span:first-child]:hidden pl-2"
