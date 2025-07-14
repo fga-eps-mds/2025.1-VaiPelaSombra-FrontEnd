@@ -169,31 +169,29 @@ const PlanoViagens: React.FC = () => {
         {isLoading && <p>Carregando planos</p>}
         {error && <p style={{ color: "red" }}>{error}</p>}
 
-        {!isLoading && !error && (
-          <>
-            <h2 className="plano-viagens-section-title">Seus planos de viagens</h2>
-            <div className="plano-viagens-cards">
-              {travelPlans.length > 0 ? (
-                travelPlans.map((plan, idx) => (
-                  <TravelPlanCard key={idx} {...plan} itineraryId={plan.id} />
-                ))
-              ) : (
-                <p>Você não tem nenhuma viagem planejada.</p>
-              )}
-            </div>
+        <>
+          <h2 className="plano-viagens-section-title">Seus planos de viagens</h2>
+          <div className="plano-viagens-cards">
+            {travelPlans.length > 0 ? (
+              travelPlans.map((plan, idx) => (
+                <TravelPlanCard key={idx} {...plan} itineraryId={plan.id} />
+              ))
+            ) : (
+              <p>Você não tem nenhuma viagem planejada.</p>
+            )}
+          </div>
 
-            <h2 className="plano-viagens-section-title">Histórico de planos de viagens</h2>
-            <div className="plano-viagens-cards">
-              {travelHistory.length > 0 ? (
-                travelHistory.map((plan, idx) => (
-                  <TravelPlanCard key={idx} {...plan} itineraryId={plan.id} />
-                ))
-              ) : (
-                <p>Nenhuma viagem no seu histórico ainda.</p>
-              )}
-            </div>
-          </>
-        )}
+          <h2 className="plano-viagens-section-title">Histórico de planos de viagens</h2>
+          <div className="plano-viagens-cards">
+            {travelHistory.length > 0 ? (
+              travelHistory.map((plan, idx) => (
+                <TravelPlanCard key={idx} {...plan} itineraryId={plan.id} />
+              ))
+            ) : (
+              <p>Nenhuma viagem no seu histórico ainda.</p>
+            )}
+          </div>
+        </>
       </div>
 
       {showModal && (
