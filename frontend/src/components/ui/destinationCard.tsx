@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { MapPin } from "lucide-react";
 import NoImage from "../../assets/NoImage.png"
+import {config} from "../../config";
 
 interface Destination {
   id: number;
@@ -10,7 +11,7 @@ interface Destination {
 
 export default function DestinationCard({ title, imageUrl, id }: Destination) {
   const navigate = useNavigate();
-  const API_BASE_URL = 'http://localhost:3000';
+  const API_BASE_URL = config.apiBaseUrl;
   const fullImageUrl = imageUrl
     ? `${API_BASE_URL}${imageUrl}`
     : NoImage;

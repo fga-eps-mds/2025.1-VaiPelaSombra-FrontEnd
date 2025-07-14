@@ -3,6 +3,7 @@ import ProfileCard from "../components/ui/profilecard";
 import ProfileForm from "../components/ui/profileform";
 import defaultavatar from '../assets/images/defaultavatar.png';
 import Navbar from "../components/NavBar.tsx";
+import {config} from "../config";
 
 type ProfileType = {
   name: string;
@@ -32,7 +33,7 @@ const Profile = () => {
     const fetchUserProfile = async () => {
       try {
         const userId = 1; 
-        const response = await fetch(`http://localhost:3000/user/${userId}`);
+        const response = await fetch(`${config.apiBaseUrl}/user/${userId}`);
 
         if (!response.ok) {
           throw new Error("Erro ao carregar o perfil.");
@@ -71,7 +72,7 @@ const Profile = () => {
         return;
       }
 
-      const response = await fetch(`http://localhost:3000/users/${userId}`, {
+      const response = await fetch(`${config.apiBaseUrl}/users/${userId}`, {
         method: "PUT", 
         headers: {
           "Content-Type": "application/json",
