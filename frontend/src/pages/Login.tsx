@@ -5,7 +5,7 @@ import Umbrella from '../assets/umbrella.svg';
 import estilo from '../assets/estilo.png';
 import EyeToggle from '../components/ui/eye_toggle';
 //import {config} from '../config';
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../hooks/useAuth";
 
 function Login() {
   const [email, setEmail] = useState("");

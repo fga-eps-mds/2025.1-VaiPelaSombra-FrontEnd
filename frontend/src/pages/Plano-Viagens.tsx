@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import Navbar from "../components/NavBar.tsx";
 import TravelPlanCard from "../components/TravelPlanCard";
 import Modal from "../components/ui/modal";
@@ -34,34 +34,50 @@ const PlanoViagens: React.FC = () => {
   const [travelHistory, setTravelHistory] = useState<TravelPlan[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [linkInput, setLinkInput] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // ✅ Usar apenas uma estratégia de controle
+  const hasInitialized = useRef(false);
+  const isRequestInProgress = useRef(false);
+
   const fetchTravelPlans = useCallback(async () => {
+    // ✅ Evitar requisições simultâneas
+    if (isRequestInProgress.current) {
+      return;
+    }
+
+    isRequestInProgress.current = true;
     setIsLoading(true);
     setError(null);
+    
     const token = getToken();
     const userId = localStorage.getItem("userId");
 
     if (!token || !userId) {
-      setError("Usuário não autenticado.");
+      const errorMsg = "Usuário não autenticado.";
+      setError(errorMsg);
       setIsLoading(false);
+      isRequestInProgress.current = false;
       return;
     }
 
     try {
-      const response = await fetch(
-        `${config.apiBaseUrl}/users/${userId}/itineraries`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const url = `${config.apiBaseUrl}/users/${userId}/itineraries`;
+      
+      const response = await fetch(url, {
+        headers: { 
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+      });
 
       if (!response.ok) {
-        throw new Error("Falha ao buscar os planos de viagem.");
+        throw new Error(`Falha ao buscar os planos de viagem. Status: ${response.status}`);
       }
 
       const data: ApiItinerary[] = await response.json();
+
       const now = new Date();
       const upcoming: ApiItinerary[] = [];
       const history: ApiItinerary[] = [];
@@ -89,23 +105,30 @@ const PlanoViagens: React.FC = () => {
         faded,
       });
 
-      setTravelPlans(upcoming.map((p) => formatPlan(p)));
-      setTravelHistory(history.map((p) => formatPlan(p, true)));
+      const formattedUpcoming = upcoming.map((p) => formatPlan(p));
+      const formattedHistory = history.map((p) => formatPlan(p, true));
+
+      setTravelPlans(formattedUpcoming);
+      setTravelHistory(formattedHistory);
+      
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Ocorreu um erro desconhecido."
-      );
-      console.error("Erro ao buscar planos:", err);
+      const errorMessage = err instanceof Error ? err.message : "Ocorreu um erro desconhecido.";
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
+      isRequestInProgress.current = false;
     }
   }, [getToken]);
 
-  useEffect(() => {
-    fetchTravelPlans();
-  }, []);
 
-  const handleConfirmLink = async () => {
+  useEffect(() => {
+    if (!hasInitialized.current) {
+      hasInitialized.current = true;
+      fetchTravelPlans();
+    }
+  }, [fetchTravelPlans]);
+
+  const handleConfirmLink = useCallback(async () => {
     const token = getToken();
     const userId = localStorage.getItem("userId");
 
@@ -129,6 +152,7 @@ const PlanoViagens: React.FC = () => {
           method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
           },
         }
       );
@@ -141,12 +165,21 @@ const PlanoViagens: React.FC = () => {
       alert("Você entrou com sucesso no plano de viagem!");
       setShowModal(false);
       setLinkInput("");
+      
       fetchTravelPlans();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Ocorreu um erro.");
-      console.error("Erro ao entrar com link:", err);
     }
-  };
+  }, [getToken, linkInput, fetchTravelPlans]);
+
+  const handleLinkInputChange = useCallback((value: string) => {
+    setLinkInput(value);
+  }, []);
+
+  const handleCloseModal = useCallback(() => {
+    setShowModal(false);
+    setLinkInput("");
+  }, []);
 
   return (
     <div className="plano-viagens-bg">
@@ -155,7 +188,7 @@ const PlanoViagens: React.FC = () => {
         <div className="plano-viagens-actions">
           <div className="primary-navigate-button-container">
             <NavigateButton
-              to="/criar-plano"
+              to="/itinerario"
               label="+ Criar um novo plano de viagem"
             />
           </div>
@@ -164,7 +197,7 @@ const PlanoViagens: React.FC = () => {
           </button>
         </div>
 
-        {isLoading && <p>Carregando planos</p>}
+        {isLoading && <p>Carregando planos...</p>}
         {error && <p style={{ color: "red" }}>{error}</p>}
 
         <>
@@ -196,9 +229,9 @@ const PlanoViagens: React.FC = () => {
         <Modal
           title="Insira o link do plano de viagem"
           inputValue={linkInput}
-          onInputChange={setLinkInput}
+          onInputChange={handleLinkInputChange}
           onConfirm={handleConfirmLink}
-          onCancel={() => setShowModal(false)}
+          onCancel={handleCloseModal}
         />
       )}
     </div>
