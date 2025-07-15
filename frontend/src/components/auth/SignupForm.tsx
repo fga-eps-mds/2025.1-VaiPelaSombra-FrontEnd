@@ -13,29 +13,61 @@ import {
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { toast } from "sonner";
-import { CircleCheckIcon } from "lucide-react";
 import { z } from "zod";
+import axios from "axios";
+import { useState } from "react";
+import EyeToggle from "../ui/eye_toggle";
+import SuccessModal from "../ui/sucessModal";
+import { config } from "@/config";
 
 export default function SignupForm() {
+        const [showPassword, setShowPassword] = useState(false);
+        const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+        const [showModal, setShowModal] = useState(false)
 
-        const form = useForm({
+        const form = useForm<z.infer<typeof SignupSchema>>({
             resolver: zodResolver(SignupSchema),
             defaultValues: {
-                fullname: "",
+                name: "",
                 email: "",
                 password: "",
                 confirmPassword: ""
             },
         });
 
-        function onSubmit(data: z.infer<typeof SignupSchema>) {
-            // dados para o backend
-            toast(JSON.stringify(data), {
-                icon: <CircleCheckIcon className="text-emerald-500 w-5 h-5" />,
-            });
+        const { isSubmitting } = form.formState;
+
+        async function onSubmit(data: z.infer<typeof SignupSchema>) {
+          try {
+            const payload = {
+              name: data.name,
+              email: data.email,
+              password: data.password,
+            };
+
+            await axios.post(`${config.apiBaseUrl}/users`, payload);
+
+            form.reset();
+            setShowModal(true)
+
+          } catch (error: unknown) {
+            let message = "Ocorreu um erro. Tente novamente.";
+
+            if (axios.isAxiosError(error) && error.response?.data?.message) {
+              message = error.response.data.message;
+
+
+              if (message.includes('A record with this unique field already exists')) {
+                message = 'Email já cadastrado.';
+              }
+            }
+
+            toast.error(message);
+          }
         }
 
     return (
+      <>
         <CardForm
         title="Crie sua conta"
         description="Crie uma conta para acessar todos os recursos."
@@ -47,12 +79,13 @@ export default function SignupForm() {
                     <div className="space-y-3">
                         <FormField
                             control={form.control}
-                            name="fullname"
+                            name="name"
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Nome completo</FormLabel>
                                     <FormControl>
                                         <Input
+                                            disabled={isSubmitting}
                                             type="text"
                                             placeholder="Digite seu nome completo"
                                             {...field}
@@ -71,6 +104,7 @@ export default function SignupForm() {
                                     <FormLabel>Email</FormLabel>
                                     <FormControl>
                                         <Input
+                                            disabled={isSubmitting}
                                             type="email"
                                             placeholder="Digite seu email"
                                             {...field}
@@ -87,13 +121,22 @@ export default function SignupForm() {
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Senha</FormLabel>
-                                    <FormControl>
-                                        <Input
-                                            type="password"
-                                            placeholder="Digite sua senha"
-                                            {...field}
+                                    <div className="relative">
+                                      <FormControl>
+                                          <Input
+                                              disabled={isSubmitting}
+                                              type={showPassword ? "text" : "password"}
+                                              placeholder="Digite sua senha"
+                                              {...field}
+                                          />
+                                      </FormControl>
+                                      <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                                        <EyeToggle
+                                          visible={showPassword}
+                                          toggleVisibility={() => setShowPassword((prev) => !prev)}
                                         />
-                                    </FormControl>
+                                      </div>
+                                  </div>
                                     <FormMessage />
                                 </FormItem>
                             )}
@@ -105,21 +148,36 @@ export default function SignupForm() {
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Confirmação de senha</FormLabel>
-                                    <FormControl>
-                                        <Input
-                                            type="password"
-                                            placeholder="Confirme sua senha"
-                                            {...field}
+                                    <div className="relative">
+                                      <FormControl>
+                                          <Input
+                                              disabled={isSubmitting}
+                                              type={showConfirmPassword ? "text" : "password"}
+                                              placeholder="Confirme sua senha"
+                                              {...field}
+                                          />
+                                      </FormControl>
+                                      <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                                        <EyeToggle
+                                          visible={showConfirmPassword}
+                                          toggleVisibility={() => setShowConfirmPassword((prev) => !prev)}
                                         />
-                                    </FormControl>
+                                      </div>
+                                    </div>
                                     <FormMessage />
                                 </FormItem>
                             )}
                         />
-                        <Button type="submit" className="w-full mt-2 cursor-pointer">Criar uma conta</Button>
+                        <Button type="submit" className="w-full mt-2 cursor-pointer"
+                          disabled={isSubmitting}>
+                          {isSubmitting ? 'Criando conta...' : 'Criar uma conta'}
+                        </Button>
                     </div>
                 </form>
             </Form>
-        </CardForm>
+          </CardForm>
+
+            <SuccessModal open={showModal} onClose={() => setShowModal(false)} />
+          </>
     );
 }
