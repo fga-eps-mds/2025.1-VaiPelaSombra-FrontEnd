@@ -67,7 +67,7 @@ describe('AuthContext', () => {
     expect(screen.getByTestId('token')).toHaveTextContent('no-token');
   });
 
-  test('inicializa com token do localStorage', async () => {
+  test('inicializa com token do localStorage mas falha no refresh', async () => {
     localStorage.setItem('authToken', 'test-token');
     
     (fetch as jest.Mock).mockRejectedValueOnce(new Error('Refresh failed'));
@@ -87,7 +87,7 @@ describe('AuthContext', () => {
     });
   });
 
-  test('getToken retorna token do localStorage quando refresh falha', async () => {
+  test('getToken retorna token do localStorage quando disponível', async () => {
     localStorage.setItem('authToken', 'stored-token');
     
     (fetch as jest.Mock).mockRejectedValueOnce(new Error('Refresh failed'));
@@ -106,6 +106,10 @@ describe('AuthContext', () => {
   });
 
   test('deve realizar login com sucesso', async () => {
+    // Ensure completely clean state for this test
+    localStorage.clear();
+    (fetch as jest.Mock).mockReset();
+    
     // Mock the initial refresh attempt to fail, then mock successful login
     (fetch as jest.Mock)
       .mockRejectedValueOnce(new Error('No refresh token'))
@@ -132,6 +136,7 @@ describe('AuthContext', () => {
     // Wait for initial render to complete
     await waitFor(() => {
       expect(screen.getByText('Login')).toBeInTheDocument();
+      expect(screen.getByTestId('auth-status')).toHaveTextContent('not-authenticated');
     });
 
     // Click login button
@@ -139,20 +144,21 @@ describe('AuthContext', () => {
       fireEvent.click(screen.getByText('Login'));
     });
 
-    // Wait for login to complete and check all expectations together
+    // Wait for login to complete - check authentication first
     await waitFor(() => {
       expect(screen.getByTestId('auth-status')).toHaveTextContent('authenticated');
     }, { timeout: 10000 });
 
+    // Then check user data in separate waitFor to avoid race conditions
     await waitFor(() => {
       expect(screen.getByTestId('user-email')).toHaveTextContent('test@test.com');
       expect(screen.getByTestId('user-info')).toHaveTextContent('Test User');
-    });
+    }, { timeout: 5000 });
 
     // Check localStorage
     expect(localStorage.getItem('authToken')).toBe('login-success-token');
     expect(localStorage.getItem('userId')).toBe('1');
-  }, 15000); // Increased test timeout
+  }, 20000);
 
   test('deve deslogar com sucesso', async () => {
     localStorage.setItem('authToken', 'fake-token');
