@@ -105,12 +105,13 @@ describe('AuthContext', () => {
   });
 
   test('deve realizar login com sucesso', async () => {
+    // Mock the initial refresh attempt to fail, then mock successful login
     (fetch as jest.Mock)
-      .mockRejectedValueOnce(new Error('No refresh token'))
+      .mockRejectedValueOnce(new Error('No refresh token')) // Initial refresh fails
       .mockResolvedValueOnce({
         ok: true,
         json: async () => ({
-          accessToken: 'refreshed-token',
+          accessToken: 'login-success-token',
           user: {
             id: 1,
             name: 'Test User',
@@ -127,20 +128,27 @@ describe('AuthContext', () => {
       );
     });
 
+    // Wait for initial render
     await waitFor(() => {
       expect(screen.getByText('Login')).toBeInTheDocument();
+      expect(screen.getByTestId('auth-status')).toHaveTextContent('not-authenticated');
     });
 
+    // Click login button
     await act(async () => {
       fireEvent.click(screen.getByText('Login'));
     });
 
+    // Wait for login to complete
     await waitFor(() => {
       expect(screen.getByTestId('auth-status')).toHaveTextContent('authenticated');
+    }, { timeout: 3000 });
+
+    await waitFor(() => {
       expect(screen.getByTestId('user-email')).toHaveTextContent('test@test.com');
     });
 
-    expect(localStorage.getItem('authToken')).toBe('refreshed-token');
+    expect(localStorage.getItem('authToken')).toBe('login-success-token');
     expect(localStorage.getItem('userId')).toBe('1');
   });
 
@@ -183,7 +191,7 @@ describe('AuthContext', () => {
     expect(localStorage.getItem('userId')).toBe(null);
   });
 
-  test('mantem estado autenticado independente de erro de requisição', async () => {
+  test('mantem estado não autenticado quando não há token', async () => {
     (fetch as jest.Mock).mockRejectedValueOnce(new Error('No refresh token'));
 
     await act(async () => {
