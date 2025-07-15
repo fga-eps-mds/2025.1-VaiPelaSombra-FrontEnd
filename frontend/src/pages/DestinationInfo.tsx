@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Toaster } from "sonner";
-import { CalendarPlus, Info, BookOpen } from "lucide-react";
+import { CalendarPlus, Info, BookOpen, Earth } from "lucide-react";
 import { Tabs,TabsContent, TabsList, TabsTrigger,} from "@/components/ui/tabs";
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
@@ -67,7 +67,8 @@ export default function DestinationInfo() {
         fetchDestinationData();
     }, [id]);
 
-    const planTrip = () => navigate('/criar-plano');
+    const handlePlanTrip = () => navigate('/criar-plano');
+    const handleSeeDestinations = () => navigate('/home');
 
     if (loading) {
         return (
@@ -106,15 +107,20 @@ export default function DestinationInfo() {
                     <h1 className="text-3xl font-mono font-extrabold">{destination.title}</h1>
                     <h4 className="text-gray-600 text-lg">{destination.locationName}</h4>
                 </div>
-                <div>
-                    <Button onClick={planTrip}>
+
+                <div className="flex items-center gap-x-2">
+                    <Button variant="outline" onClick={handleSeeDestinations}>
+                        <Earth className="mr-2 h-4 w-4 text-[#223A60]" />
+                        Explorar Destinos
+                    </Button>
+                    <Button onClick={handlePlanTrip}>
                         <CalendarPlus className="mr-2 h-4 w-4" />
                         Planejar Viagem
                     </Button>
                 </div>
             </section>
 
-            <section className="mt-5">
+            <section className="mt-8">
                 <div className="flex h-[400px]">
                     <div className="w-1/2 bg-gray-200 mr-2 rounded-md">
                         {images.length > 0 && <img src={`${config.apiBaseUrl}${images[0].url}`} alt={`Imagem principal de ${destination.title}`} className="w-full h-full object-cover rounded-md"/>}
@@ -146,7 +152,7 @@ export default function DestinationInfo() {
                     </p>
                 </TabsContent>
 
-                <TabsContent value="informacoes" className="mt-2">
+                <TabsContent value="informacoes" className="mt-1">
                     <h2 className="text-2xl font-mono font-extrabold">Informações</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4 p-4 border rounded-lg">
                         <div>
