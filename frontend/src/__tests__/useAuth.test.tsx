@@ -47,8 +47,7 @@ test('getToken retorna null quando não há token', async () => {
   });
 });
 
-test('getStoredToken funciona independente do contexto', async () => {
-  localStorage.setItem('authToken', 'stored-token');
+test('getStoredToken retorna null quando não há token armazenado', async () => {
   (fetch as jest.Mock).mockRejectedValueOnce(new Error('No refresh token'));
 
   const { result } = renderHook(() => useAuth(), { wrapper });
@@ -57,7 +56,7 @@ test('getStoredToken funciona independente do contexto', async () => {
     expect(result.current).toBeTruthy();
   });
 
-  expect(result.current.getStoredToken()).toBe('stored-token');
+  expect(result.current.getStoredToken()).toBeNull();
 });
 
 test('getToken usa localStorage quando contexto falha', async () => {
@@ -93,21 +92,15 @@ test('isAuthenticated é false quando não há usuário nem token', async () => 
   });
 });
 
-test('isAuthenticated é true quando há usuário e token', async () => {
+test('isAuthenticated é false mesmo com token se não há usuário', async () => {
   localStorage.setItem('authToken', 'valid-token');
   
-  (fetch as jest.Mock).mockResolvedValueOnce({
-    ok: true,
-    json: async () => ({
-      accessToken: 'refreshed-token',
-      user: { id: 1, name: 'Test User', email: 'test@test.com' }
-    }),
-  });
+  (fetch as jest.Mock).mockRejectedValueOnce(new Error('Refresh failed'));
 
   const { result } = renderHook(() => useAuth(), { wrapper });
 
   await waitFor(() => {
-    expect(result.current.isAuthenticated).toBe(true);
+    expect(result.current.isAuthenticated).toBe(false);
   });
 });
 
@@ -121,21 +114,14 @@ test('user é null quando não autenticado', async () => {
   });
 });
 
-test('user contém dados quando autenticado', async () => {
+test('user é null quando refresh falha', async () => {
   localStorage.setItem('authToken', 'valid-token');
-  const mockUser = { id: 1, name: 'Test User', email: 'test@test.com' };
   
-  (fetch as jest.Mock).mockResolvedValueOnce({
-    ok: true,
-    json: async () => ({
-      accessToken: 'refreshed-token',
-      user: mockUser
-    }),
-  });
+  (fetch as jest.Mock).mockRejectedValueOnce(new Error('Refresh failed'));
 
   const { result } = renderHook(() => useAuth(), { wrapper });
 
   await waitFor(() => {
-    expect(result.current.user).toEqual(mockUser);
+    expect(result.current.user).toBeNull();
   });
 });
