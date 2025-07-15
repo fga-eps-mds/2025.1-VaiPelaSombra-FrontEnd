@@ -17,7 +17,7 @@ interface BasicDialogProps {
     children: React.ReactNode;
 }
 
-export function BasicDialog({ open, onOpenChange, title, description, children }: BasicDialogProps) {
+export function BasicDialog({ open, onOpenChange, title, description, children}: BasicDialogProps) {
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent>

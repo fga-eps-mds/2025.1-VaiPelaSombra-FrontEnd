@@ -13,15 +13,6 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import {
-    Dialog,
-    DialogClose,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from "@/components/ui/dialog"
 import { cn } from "@/lib/utils"
 import { Textarea } from "@/components/ui/textarea"
 import { act, useState, useId, useRef } from "react";
@@ -32,8 +23,16 @@ import type { TripPlan } from "@/types/trip-plan.type";
 import { DeleteDialog } from "@/components/DeleteDialog"
 import { BasicDialog } from "@/components/BasicDialog"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
+import {
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
 
 
 export default function TripPlan() {
@@ -41,6 +40,7 @@ export default function TripPlan() {
     const [activeSection, SetActiveSection] = useState<string>("")
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [isInviteFriendsDialogOpen, setIsInviteFriendsDialogOpen] = useState(false);
+    const [isChangeImageDialogOpen, setIsChangeImageDialogOpen] = useState(false);
 
     const id = useId()
     const [copied, setCopied] = useState<boolean>(false)
@@ -104,7 +104,7 @@ export default function TripPlan() {
                                 id={id}
                                 className="pe-9"
                                 type="text"
-                                defaultValue="pnpm install origin-ui"
+                                defaultValue="https://www.vaipelasombra.com/plantrip/invite=894375IUHDFGDFO90832FJS"
                                 readOnly
                             />
                             <TooltipProvider delayDuration={0}>
@@ -148,6 +148,32 @@ export default function TripPlan() {
                 }
             />
 
+            <Dialog open={isChangeImageDialogOpen} onOpenChange={setIsChangeImageDialogOpen}>
+                <DialogContent className="sm:max-w-2xl">
+                    <DialogHeader>
+                        <DialogTitle>Escolha uma nova imagem</DialogTitle>
+                        <DialogDescription>Voce pode mudar de foto quando quiser!</DialogDescription>
+                    </DialogHeader>
+                    <div className="grid grid-cols-3 gap-4 py-4">
+                        {Array.from({ length: 9 }).map((_, index) => (
+                            <div
+                                key={index}
+                                className="aspect-video cursor-pointer rounded-lg bg-gray-200 transition-all hover:ring-2 hover:ring-blue-950 hover:ring-offset-2"
+                            />
+                        ))}
+                    </div>
+                    <DialogFooter>
+                        <DialogClose asChild>
+                            <Button variant={"outline"}>Cancelar</Button>
+                        </DialogClose>
+                        <Button onClick={() => console.log("teste")}>
+                            Salvar
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+
             <SideBar onScrollToSection={scrollToSection}></SideBar>
 
             <main className="flex-col w-180 bg-white overflow-y-auto no-scrollbar shadow-[10px_0px_15px_-3px_rgba(0,0,0,0.1)] z-10">
@@ -171,7 +197,7 @@ export default function TripPlan() {
                                     <Edit size={16} className="opacity-60" aria-hidden="true" />
                                     <span>Editar plano</span>
                                 </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => console.log("teste")}>
+                                <DropdownMenuItem onClick={() => setIsChangeImageDialogOpen(true)}>
                                     <ImageUpIcon size={16} className="opacity-60" aria-hidden="true" />
                                     <span>Mudar imagem</span>
                                 </DropdownMenuItem>
@@ -287,7 +313,7 @@ export default function TripPlan() {
 
                 </div>
             </main>
-            <aside className="flex-1 bg-blue-200"></aside>
+            <aside className="flex-1 bg-gray-300"></aside>
         </div>
     )
 }
