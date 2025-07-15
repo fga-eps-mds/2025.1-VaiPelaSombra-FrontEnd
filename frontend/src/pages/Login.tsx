@@ -1,102 +1,93 @@
-import { useState } from "react"
-import { useNavigate } from "react-router-dom";
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import imagem4 from '../assets/imagem4.jpg';
 import Umbrella from '../assets/umbrella.svg';
 import EyeToggle from '../components/ui/eye_toggle';
 import estilo from '../assets/estilo.png';
-
+import { useAuth } from '@/context/AuthContext';
 
 function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [emailError, setEmailError] = useState("");
-  const [passwordError, setPasswordError] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const { login } = useAuth();
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
   const [mostrarSenha, setMostrarSenha] = useState(false);
-  const [apiError, setApiError] = useState("");
+  const [apiError, setApiError] = useState('');
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
 
   const validarCampos = () => {
     let valid = true;
-    setEmailError("");
-    setPasswordError("");
+    setEmailError('');
+    setPasswordError('');
 
     if (!email) {
-      setEmailError("Please enter your email.");
+      setEmailError('Please enter your email.');
       valid = false;
     } else {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) {
-        setEmailError("Invalid email address.");
+        setEmailError('Invalid email address.');
         valid = false;
       }
     }
 
     if (!password) {
-      setPasswordError("Please enter your password.");
+      setPasswordError('Please enter your password.');
       valid = false;
     } else if (password.length < 6) {
-      setPasswordError("Password must be at least 6 characters long.");
+      setPasswordError('Password must be at least 6 characters long.');
       valid = false;
     }
 
     return valid;
   };
 
-  const autenticarUsuario = async () => {
-    const response = await fetch("http://localhost:3000/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || "Erro ao fazer login.");
-    }
-
-    //parte JWT q é token web JS
-    const data = await response.json();
-    localStorage.setItem("token", data.token);
-    navigate("/home");
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setApiError("");
+    e.preventDefault();
+    setApiError('');
 
-  if (!validarCampos()) return;
+    if (!validarCampos()) return;
 
-  setLoading(true);
+    setLoading(true);
 
-  try {
-    await autenticarUsuario();
-  } catch (err) {
-    if (err instanceof Error) {
-      setApiError(err.message);
-    } else {
-      setApiError("Login failed.");
+    try {
+      await login(email, password);
+      navigate('/home');
+    } catch (err) {
+      if (err instanceof Error) {
+        setApiError(err.message);
+      } else {
+        setApiError('Login failed.');
+      }
+    } finally {
+      setLoading(false);
     }
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   return (
     <div className="h-screen w-full flex bg-white">
-      <div className="h-full w-1/2 bg-cover bg-no-repeat bg-center" style={{ backgroundImage: `url(${imagem4})` }}></div>
+      <div
+        className="h-full w-1/2 bg-cover bg-no-repeat bg-center"
+        style={{ backgroundImage: `url(${imagem4})` }}
+      ></div>
 
-      <div className="h-full w-1/2 bg-white flex justify-center items-center bg-cover bg-no-repeat bg-center" style={{ backgroundImage: `url(${estilo})` }}>
+      <div
+        className="h-full w-1/2 bg-white flex justify-center items-center bg-cover bg-no-repeat bg-center"
+        style={{ backgroundImage: `url(${estilo})` }}
+      >
         <div className="h-[70%] w-[55%] bg-white border-2 border-[#E5E5E5] rounded-[10px] shadow-md">
           <h1 className="text-3xl font-bold text-black pt-6 px-7 pb-7">Fazer login</h1>
 
           <form onSubmit={handleSubmit} className="flex flex-col w-full">
-            <div className='space-y-7'>
-
+            <div className="space-y-7">
               {/* Campo de e-mail */}
               <div className="flex flex-col space-y-1 px-7">
-                <label htmlFor="email" className="text-sans text-[#223A60] font-md">E-mail</label>
+                <label htmlFor="email" className="text-sans text-[#223A60] font-md">
+                  E-mail
+                </label>
                 <input
                   className={`w-full border-2 rounded-md text-sm pl-2 py-1.5 font-sm placeholder-[#9A9A9A] ${
                     emailError ? 'border-red-500' : 'border-[#E5E5E5]'
@@ -107,20 +98,21 @@ function Login() {
                   value={email}
                   onChange={(e) => {
                     setEmail(e.target.value);
-                    if (emailError) setEmailError("");
+                    if (emailError) setEmailError('');
                   }}
                 />
-                {emailError && (
-                  <p className="text-red-500 text-sm mt-1">{emailError}</p>
-                )}
+                {emailError && <p className="text-red-500 text-sm mt-1">{emailError}</p>}
               </div>
-
 
               {/* Campo de senha */}
               <div className="flex flex-col space-y-1 px-7">
                 <div className="flex justify-between items-center">
-                  <label htmlFor="senha" className="text-sans text-[#223A60] font-md">Senha</label>
-                  <a href="#" className="text-sm text-[#223A60] hover:underline font-sans">Esqueceu a senha?</a>
+                  <label htmlFor="senha" className="text-sans text-[#223A60] font-md">
+                    Senha
+                  </label>
+                  <a href="#" className="text-sm text-[#223A60] hover:underline font-sans">
+                    Esqueceu a senha?
+                  </a>
                 </div>
                 <div className="relative w-full">
                   <input
@@ -128,25 +120,23 @@ function Login() {
                       passwordError ? 'border-red-500' : 'border-[#E5E5E5]'
                     }`}
                     id="senha"
-                    type={mostrarSenha ? "text" : "password"}
+                    type={mostrarSenha ? 'text' : 'password'}
                     placeholder="Digite a sua senha"
                     value={password}
                     onChange={(e) => {
                       setPassword(e.target.value);
-                      if (passwordError) setPasswordError("");
+                      if (passwordError) setPasswordError('');
                     }}
                   />
                   <div className="absolute right-3 top-[50%] translate-y-[-35%] cursor-pointer">
                     <EyeToggle
                       visible={mostrarSenha}
-                      toggleVisibility={() => setMostrarSenha(prev => !prev)}
+                      toggleVisibility={() => setMostrarSenha((prev) => !prev)}
                     />
                   </div>
-                  </div>
-                  {passwordError && (
-                    <p className="text-red-500 text-sm mt-1">{passwordError}</p>
-                  )}
                 </div>
+                {passwordError && <p className="text-red-500 text-sm mt-1">{passwordError}</p>}
+              </div>
 
               {/* Lembrar a senha */}
               <div className="flex items-center justify-between pl-7">
@@ -157,14 +147,14 @@ function Login() {
                     name="lembrar"
                     className="accent-[#223A60] w-3 h-3"
                   />
-                  <label htmlFor="lembrar" className="text-xs text-[#223A60] pt-0.5">Lembrar a senha</label>
+                  <label htmlFor="lembrar" className="text-xs text-[#223A60] pt-0.5">
+                    Lembrar a senha
+                  </label>
                 </div>
               </div>
 
               {/* Erro de API */}
-              {apiError && (
-                <div className="text-red-600 text-sm font-medium px-7">{apiError}</div>
-              )}
+              {apiError && <div className="text-red-600 text-sm font-medium px-7">{apiError}</div>}
             </div>
 
             {/* Botões */}
@@ -184,18 +174,18 @@ function Login() {
               )}
             </div>
 
-            <div className='w-full pt-4 flex justify-row gap-1 justify-center'>
-              <label className='text-sm font-md text-[#283841]'>Não tem uma conta?</label>
+            <div className="w-full pt-4 flex justify-row gap-1 justify-center">
+              <label className="text-sm font-md text-[#283841]">Não tem uma conta?</label>
               <span
                 onClick={() => navigate('/signup')}
-                className="underline text-sm font-md text-[#223A60] cursor-pointer">
+                className="underline text-sm font-md text-[#223A60] cursor-pointer"
+              >
                 Cadastre-se
               </span>
-
             </div>
             {/* Slogan */}
-            <div className='w-full pt-3 flex flex-row items-center justify-center gap-1'>
-              <label className='pt-3 text-sm font-md text-[#223A60]'>Vai Pela Sombra</label>
+            <div className="w-full pt-3 flex flex-row items-center justify-center gap-1">
+              <label className="pt-3 text-sm font-md text-[#223A60]">Vai Pela Sombra</label>
               <img src={Umbrella} alt="Ícone" className="w-7 h-7" />
             </div>
           </form>

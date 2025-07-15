@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { cn } from "@/lib/utils"
 import { Textarea } from "@/components/ui/textarea"
-import { act, useState, useId, useRef } from "react";
+import { useState, useId, useRef } from "react";
 import { SideBar } from "@/components/SideBar";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
@@ -36,7 +36,6 @@ import {
 
 
 export default function TripPlan() {
-
     const [activeSection, SetActiveSection] = useState<string>("")
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [isInviteFriendsDialogOpen, setIsInviteFriendsDialogOpen] = useState(false);
@@ -60,11 +59,6 @@ export default function TripPlan() {
             section.scrollIntoView({ behavior: "smooth", block: "start" })
             SetActiveSection(sectionId)
         }
-    }
-
-    interface sectionsProp {
-        sectionId: number,
-        label: string
     }
 
     const mockTrip: TripPlan = {
@@ -315,5 +309,5 @@ export default function TripPlan() {
             </main>
             <aside className="flex-1 bg-gray-300"></aside>
         </div>
-    )
+    );
 }

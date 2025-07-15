@@ -1,7 +1,8 @@
-import Navbar from "../components/NavBar.tsx";
-import TravelPlanCard from "../components/TravelPlanCard";
-import "./Plano-Viagens.css";
-import { useEffect, useState } from "react";
+import Navbar from '../components/NavBar.tsx';
+import TravelPlanCard from '../components/TravelPlanCard';
+import './Plano-Viagens.css';
+import { useEffect, useState } from 'react';
+import config from '@/config';
 
 type User = {
   name: string;
@@ -29,7 +30,7 @@ const PlanoViagens: React.FC = () => {
 
   useEffect(() => {
     const userId = 1; // modificar depois que obtivermos o useAuth
-    fetch(`http://localhost:3000/PlanoViagem/${userId}`)
+    fetch(`${config.apiBaseUrl}/PlanoViagem/${userId}`)
       .then((res) => res.json())
       .then((data: ApiTravelPlan[]) => {
         const now = new Date();
@@ -38,15 +39,13 @@ const PlanoViagens: React.FC = () => {
 
         const formatPlan = (plan: ApiTravelPlan, faded = false): TravelPlan => ({
           title: plan.nome,
-          image: "/src/assets/images/La_Tour_Eiffel_vue_de_la_Tour_Saint-Jacques,_Paris_août_2014_(2).webp",
+          image:
+            '/src/assets/images/La_Tour_Eiffel_vue_de_la_Tour_Saint-Jacques,_Paris_août_2014_(2).webp',
           users: [],
-          date: new Date(plan.dataInicio).toLocaleDateString("pt-BR"),
+          date: new Date(plan.dataInicio).toLocaleDateString('pt-BR'),
           daysLeft: Math.max(
             0,
-            Math.ceil(
-              (new Date(plan.dataInicio).getTime() - now.getTime()) /
-                (1000 * 60 * 60 * 24)
-            )
+            Math.ceil((new Date(plan.dataInicio).getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
           ),
           faded,
         });
@@ -55,7 +54,7 @@ const PlanoViagens: React.FC = () => {
         setTravelHistory(history.map((p) => formatPlan(p, true)));
       })
       .catch((err) => {
-        console.error("Erro ao buscar planos:", err);
+        console.error('Erro ao buscar planos:', err);
       });
   }, []);
 

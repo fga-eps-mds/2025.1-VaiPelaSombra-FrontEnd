@@ -1,24 +1,22 @@
-import NavigateButton from "../components/NavigateButton"
-import { useAppContext } from "../context/AppContext"
-
+import { useAuth } from '@/context/AuthContext';
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 
 function Home() {
-  const { theme, setTheme } = useAppContext()
+  const { isAuthenticated, user, logout } = useAuth();
 
   return (
-    <div>
-      <h1>Home Page</h1>
-      <p>Bem-vindo à página inicial!</p>
-      <p>Tema atual: {theme}</p>
-      <p>Se quiser alterar o tema, vá para página seguinte!</p>
-
-      <button onClick={() => setTheme(theme === "light" ? "dark" : "light")}>
-        Alternar tema
-      </button>
-
-      <NavigateButton to="/example-page" label="Ir para a página Example" />
-      <NavigateButton to="/Plano-Viagens" label="Ir para Plano de Viagens" />
-    </div>
-  )
+    <nav>
+      {isAuthenticated ? (
+        <>
+          <span>Welcome, {user?.name}</span>
+          <span>You are logged as {user?.email}</span>
+          <Button onClick={logout}>Logout</Button>
+        </>
+      ) : (
+        <Link to="/login">Login</Link>
+      )}
+    </nav>
+  );
 }
-  export default Home
+export default Home;
