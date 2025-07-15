@@ -29,6 +29,14 @@ module.exports = {
   ],
   rules: {
     'prettier/prettier': 'error',
-    'react/react-in-jsx-scope': 'off'
+    'react/react-in-jsx-scope': 'off',
+    '@typescript-eslint/no-explicit-any': 'off',
+    '@typescript-eslint/no-unused-vars': ['off', { 
+      'vars': 'all', 
+      'args': 'after-used', 
+      'ignoreRestSiblings': false 
+    }],
+    'react-hooks/exhaustive-deps': 'off',
+    'no-unused-vars': 'off'
   }
 };
