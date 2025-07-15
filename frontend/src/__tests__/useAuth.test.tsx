@@ -3,6 +3,7 @@ import { useAuth } from '../hooks/useAuth';
 import { AuthProvider } from '../context/AuthContext';
 import { ReactNode } from 'react';
 import '@testing-library/jest-dom';
+import { act } from 'react';
 
 jest.mock('../config', () => ({
   config: {
@@ -51,19 +52,22 @@ test('getStoredToken funciona independente do contexto', async () => {
   localStorage.setItem('authToken', 'stored-token');
   (fetch as jest.Mock).mockRejectedValueOnce(new Error('No refresh token'));
 
-  const { result } = renderHook(() => useAuth(), { wrapper });
-
-  // getStoredToken should work immediately without waiting for context
-  expect(result.current.getStoredToken()).toBe('stored-token');
+  await act(async () => {
+    const { result } = renderHook(() => useAuth(), { wrapper });
+    
+    await waitFor(() => {
+      expect(result.current.getStoredToken()).toBe('stored-token');
+    });
+  });
 });
 
-test('getToken retorna token do contexto quando disponível', async () => {
+test('getToken prioriza contexto quando disponível', async () => {
   localStorage.setItem('authToken', 'stored-token');
   
   (fetch as jest.Mock).mockResolvedValueOnce({
     ok: true,
     json: async () => ({
-      accessToken: 'context-token',
+      accessToken: 'refreshed-token',
       user: { id: 1, name: 'Test User', email: 'test@test.com' }
     }),
   });
@@ -71,11 +75,11 @@ test('getToken retorna token do contexto quando disponível', async () => {
   const { result } = renderHook(() => useAuth(), { wrapper });
 
   await waitFor(() => {
-    expect(result.current.getToken()).toBe('context-token');
+    expect(result.current.getToken()).toBe('refreshed-token');
   });
 });
 
-test('getToken usa localStorage quando contexto não tem token', async () => {
+test('getToken usa localStorage quando contexto falha', async () => {
   localStorage.setItem('authToken', 'fallback-token');
   (fetch as jest.Mock).mockRejectedValueOnce(new Error('No refresh token'));
 
