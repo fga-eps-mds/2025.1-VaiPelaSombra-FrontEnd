@@ -15,9 +15,9 @@ jest.mock('react-router-dom', () => ({
   ),
 }));
 
-// Mock do AuthContext
+// Mock do useAuth hook - Fix: mock the correct path
 const mockLogin = jest.fn();
-jest.mock('../context/AuthContext', () => ({
+jest.mock('../hooks/useAuth', () => ({
   useAuth: () => ({
     login: mockLogin,
   }),
@@ -28,7 +28,7 @@ jest.mock('../components/ui/eye_toggle', () => ({
   __esModule: true,
   default: ({ visible, toggleVisibility }: { visible: boolean; toggleVisibility: () => void }) => (
     <div data-testid="eye-toggle" onClick={toggleVisibility}>
-      {visible ? '👁️' : '🔒'} {/* Representação simples para o teste */}
+      {visible ? '👁️' : '🔒'}
     </div>
   ),
 }));
