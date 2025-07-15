@@ -1,12 +1,12 @@
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { AuthProvider } from '../context/AuthContext';
 import { useAuth } from '../hooks/useAuth';
-import { act } from 'react'; // ← Change this line
-import '@testing-library/jest-dom'; // ← Add this line
+import { act } from 'react';
+import '@testing-library/jest-dom';
 
 jest.mock('../config', () => ({
   config: {
-    apiBaseUrl: 'http://localhost:3000', // ← Remove /api
+    apiBaseUrl: 'http://localhost:3000',
   },
 }));
 
@@ -38,12 +38,12 @@ global.fetch = jest.fn();
 beforeEach(() => {
   localStorage.clear();
   (fetch as jest.Mock).mockClear();
-  jest.spyOn(console, 'log').mockImplementation(() => {}); // ← Add this
+  jest.spyOn(console, 'log').mockImplementation(() => {});
 });
 
 afterEach(() => {
   localStorage.clear();
-  jest.restoreAllMocks(); // ← Add this
+  jest.restoreAllMocks();
 });
 
 describe('AuthContext', () => {
@@ -89,8 +89,11 @@ describe('AuthContext', () => {
       expect(screen.getByTestId('auth-status')).toHaveTextContent('authenticated');
     });
 
-    expect(screen.getByTestId('user-info')).toHaveTextContent('Test User');
-    expect(screen.getByTestId('user-email')).toHaveTextContent('test@test.com');
+    // Wait a bit more for the state to update
+    await waitFor(() => {
+      expect(screen.getByTestId('user-info')).toHaveTextContent('Test User');
+      expect(screen.getByTestId('user-email')).toHaveTextContent('test@test.com');
+    });
   });
 
   test('getToken retorna token do contexto', async () => {
@@ -99,7 +102,7 @@ describe('AuthContext', () => {
     (fetch as jest.Mock).mockResolvedValueOnce({
       ok: true,
       json: async () => ({
-        accessToken: 'refreshed-token', // ← Change to match actual behavior
+        accessToken: 'refreshed-token',
         user: { id: 1, name: 'Test User', email: 'test@test.com' }
       }),
     });
@@ -113,7 +116,7 @@ describe('AuthContext', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByTestId('token')).toHaveTextContent('refreshed-token'); // ← Change expected value
+      expect(screen.getByTestId('token')).toHaveTextContent('refreshed-token');
     });
   });
 
@@ -220,6 +223,7 @@ describe('AuthContext', () => {
       fireEvent.click(screen.getByText('Login'));
     });
 
+    // Should remain not authenticated after failed login
     await waitFor(() => {
       expect(screen.getByTestId('auth-status')).toHaveTextContent('not-authenticated');
     });

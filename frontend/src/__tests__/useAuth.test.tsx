@@ -47,15 +47,14 @@ test('getToken retorna null quando não há token', async () => {
   });
 });
 
-test('getStoredToken retorna token do localStorage', async () => {
+test('getStoredToken funciona independente do contexto', async () => {
   localStorage.setItem('authToken', 'stored-token');
   (fetch as jest.Mock).mockRejectedValueOnce(new Error('No refresh token'));
 
   const { result } = renderHook(() => useAuth(), { wrapper });
 
-  await waitFor(() => {
-    expect(result.current.getStoredToken()).toBe('stored-token');
-  });
+  // getStoredToken should work immediately without waiting for context
+  expect(result.current.getStoredToken()).toBe('stored-token');
 });
 
 test('getToken retorna token do contexto quando disponível', async () => {
@@ -76,7 +75,7 @@ test('getToken retorna token do contexto quando disponível', async () => {
   });
 });
 
-test('getToken fallback para localStorage quando contexto não tem token', async () => {
+test('getToken usa localStorage quando contexto não tem token', async () => {
   localStorage.setItem('authToken', 'fallback-token');
   (fetch as jest.Mock).mockRejectedValueOnce(new Error('No refresh token'));
 
