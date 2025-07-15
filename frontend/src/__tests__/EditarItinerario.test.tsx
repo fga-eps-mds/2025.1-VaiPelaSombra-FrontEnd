@@ -83,7 +83,7 @@ test('carrega os dados, permite a edição e submete com sucesso', async () => {
   });
 
   expect(global.fetch).toHaveBeenCalledWith(
-    'http://localhost:3000/api/itineraries/1', 
+    'http://localhost:3000/itineraries/1', 
     expect.objectContaining({
       method: 'GET',
       headers: {
@@ -107,7 +107,7 @@ test('carrega os dados, permite a edição e submete com sucesso', async () => {
 
   await waitFor(() => {
     expect(global.fetch).toHaveBeenCalledWith(
-      'http://localhost:3000/api/itineraries/1', 
+      'http://localhost:3000/itineraries/1', 
       expect.objectContaining({
         method: 'PUT',
         headers: {

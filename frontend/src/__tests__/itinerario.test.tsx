@@ -57,7 +57,7 @@ test('submete o formulário com sucesso e redireciona', async () => {
   await waitFor(() => {
     expect(global.fetch).toHaveBeenCalledTimes(1);
     expect(global.fetch).toHaveBeenCalledWith(
-      'http://localhost:3000/api/itineraries/123', //
+      'http://localhost:3000/itineraries/123', //
       expect.objectContaining({
         method: 'POST',
         headers: {
