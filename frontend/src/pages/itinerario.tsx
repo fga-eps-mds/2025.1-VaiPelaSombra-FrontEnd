@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 import Navbar from '../components/NavBar';
@@ -16,8 +16,16 @@ interface CreateItineraryPayload {
   totalBudget?: number;
 }
 
+interface DecodedToken {
+  id?: string;
+  userId?: string;
+  sub?: string;
+  exp?: number;
+  iat?: number;
+}
+
 const CreateItineraryPage: React.FC = () => {
-  const { getToken, isAuthenticated } = useAuth();
+  const { getToken } = useAuth(); // ✅ Remover isAuthenticated se não existir
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     title: '',
@@ -31,46 +39,68 @@ const CreateItineraryPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   
-  // Adicionar states para link sharing
   const [pageLink, setPageLink] = useState('');
   const [copied, setCopied] = useState(false);
 
-  // Verificar autenticação usando o hook
-  useEffect(() => {
-    if (!isAuthenticated) {
-      navigate('/login');
-      return;
-    }
-
+  // ✅ Implementar verificação de autenticação sem isAuthenticated
+  const verifyAuthentication = useCallback(() => {
     const token = getToken();
+    
     if (!token) {
       navigate('/login');
-      return;
+      return false;
     }
 
-    let userId;
+    // Verificar se o token não expirou
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const decoded: any = jwtDecode(token);
-      userId = decoded.id || decoded.userId || decoded.sub;
+      const decoded = jwtDecode<DecodedToken>(token);
+      const currentTime = Math.floor(Date.now() / 1000);
       
-      // Garantir que o userId está salvo no localStorage
-      if (userId && !localStorage.getItem("userId")) {
-        localStorage.setItem("userId", userId);
+      if (decoded.exp && decoded.exp < currentTime) {
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('userId');
+        navigate('/login');
+        return false;
       }
-    } catch (error) { // ✅ Mudei de 'e' para 'error'
+    } catch (error) {
       console.error('Token inválido:', error);
       localStorage.removeItem('authToken');
       localStorage.removeItem('userId');
       navigate('/login');
-      return;
+      return false;
     }
-  }, [navigate, isAuthenticated, getToken]);
+
+    const existingUserId = localStorage.getItem("userId");
+    if (!existingUserId) {
+      try {
+        const decoded = jwtDecode<DecodedToken>(token);
+        const userId = decoded.id || decoded.userId || decoded.sub;
+        
+        if (userId) {
+          localStorage.setItem("userId", userId);
+        }
+      } catch (error) {
+        console.error('Token inválido:', error);
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('userId');
+        navigate('/login');
+        return false;
+      }
+    }
+    
+    return true;
+  }, [getToken, navigate]); // ✅ Dependências corretas
 
   useEffect(() => {
-    setPageLink(window.location.href);
-  }, []);
+    const isValid = verifyAuthentication();
+    if (!isValid) return;
+    
+    if (!pageLink) {
+      setPageLink(window.location.href);
+    }
+  }, [verifyAuthentication, pageLink]);
 
+  // ✅ Resto do código permanece igual
   const handleCopyLink = () => {
     navigator.clipboard.writeText(pageLink);
     setCopied(true);
@@ -98,17 +128,22 @@ const CreateItineraryPage: React.FC = () => {
       return;
     }
 
+    if (isLoading) return;
+
     setIsLoading(true);
     const token = getToken();
-    let userId = localStorage.getItem("userId");
+    let userId: string | null = localStorage.getItem("userId");
 
     if (!userId && token) {
       try {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const decoded: any = jwtDecode(token);
-        userId = decoded.id || decoded.userId || decoded.sub;
-        if (userId) localStorage.setItem("userId", userId);
-      } catch (error) { // ✅ Mudei de 'e' para 'error' e agora uso a variável
+        const decoded = jwtDecode<DecodedToken>(token);
+        const decodedUserId = decoded.id || decoded.userId || decoded.sub;
+        
+        if (decodedUserId) {
+          userId = decodedUserId;
+          localStorage.setItem("userId", decodedUserId);
+        }
+      } catch (error) {
         console.error('Token inválido ao decodificar:', error);
         setError("Token inválido. Por favor, faça login novamente.");
         setIsLoading(false);
@@ -159,6 +194,7 @@ const CreateItineraryPage: React.FC = () => {
     }
   };
 
+  // ✅ JSX permanece igual
   return (
     <div className="plano-bg">
       <Navbar />

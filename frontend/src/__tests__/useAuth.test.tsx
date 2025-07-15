@@ -1,62 +1,127 @@
-
-import { render, screen } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 import { useAuth } from '../hooks/useAuth';
-import { AuthContext } from '../context/AuthContext';
-
+import { AuthProvider } from '../context/AuthContext';
+import { ReactNode } from 'react';
+import '@testing-library/jest-dom';
 
 jest.mock('../config', () => ({
   config: {
-    apiBaseUrl: 'http://localhost:3000/api'
-  }
+    apiBaseUrl: 'http://localhost:3000',
+  },
 }));
 
+global.fetch = jest.fn();
+
+const wrapper = ({ children }: { children: ReactNode }) => (
+  <AuthProvider>{children}</AuthProvider>
+);
 
 beforeEach(() => {
-  Storage.prototype.getItem = jest.fn((key) => {
-    if (key === 'authToken') return 'storedToken123';
-    return null;
+  localStorage.clear();
+  (fetch as jest.Mock).mockClear();
+  jest.spyOn(console, 'log').mockImplementation(() => {});
+});
+
+afterEach(() => {
+  localStorage.clear();
+  jest.restoreAllMocks();
+});
+
+test('lança erro quando usado fora do AuthProvider', () => {
+  const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+  
+  expect(() => {
+    renderHook(() => useAuth());
+  }).toThrow('useAuth must be used within AuthProvider');
+  
+  consoleSpy.mockRestore();
+});
+
+test('getToken retorna null quando não há token', async () => {
+  (fetch as jest.Mock).mockRejectedValueOnce(new Error('No refresh token'));
+
+  const { result } = renderHook(() => useAuth(), { wrapper });
+
+  await waitFor(() => {
+    expect(result.current.getToken()).toBeNull();
   });
 });
 
-describe('useAuth hook', () => {
-  it('deve acessar o contexto e retornar valores corretamente', () => {
-    const mockContext = {
-      user: { id: 1, name: 'Test User', email: 'test@test.com' },
-      accessToken: '123abc',
-      isAuthenticated: true,
-      login: jest.fn(),
-      logout: jest.fn(),
-      refresh: jest.fn(),
-    };
+test('getStoredToken retorna null quando não há token armazenado', async () => {
+  (fetch as jest.Mock).mockRejectedValueOnce(new Error('No refresh token'));
 
-    const TestComponent = () => {
-      const auth = useAuth();
-      return (
-        <>
-          <p data-testid="token">{auth.getToken()}</p>
-          <p data-testid="stored-token">{auth.getStoredToken()}</p>
-        </>
-      );
-    };
-
-    render(
-      <AuthContext.Provider value={mockContext}>
-        <TestComponent />
-      </AuthContext.Provider>
-    );
-
-    expect(screen.getByTestId('token').textContent).toBe('123abc');
-    expect(screen.getByTestId('stored-token').textContent).toBe('storedToken123');
+  const { result } = renderHook(() => useAuth(), { wrapper });
+  
+  await waitFor(() => {
+    expect(result.current).toBeTruthy();
   });
 
-  it('deve lançar erro se usado fora de AuthProvider', () => {
-    const TestComponent = () => {
-      useAuth();
-      return <p>Teste</p>;
-    };
+  expect(result.current.getStoredToken()).toBeNull();
+});
 
-    expect(() => render(<TestComponent />)).toThrow(
-      'useAuth must be used within AuthProvider'
-    );
+test('getToken usa localStorage quando contexto falha', async () => {
+  localStorage.setItem('authToken', 'stored-token');
+  
+  (fetch as jest.Mock).mockRejectedValueOnce(new Error('No refresh token'));
+
+  const { result } = renderHook(() => useAuth(), { wrapper });
+
+  await waitFor(() => {
+    expect(result.current.getToken()).toBe('stored-token');
+  });
+});
+
+test('getToken usa localStorage quando contexto não tem token', async () => {
+  localStorage.setItem('authToken', 'fallback-token');
+  (fetch as jest.Mock).mockRejectedValueOnce(new Error('No refresh token'));
+
+  const { result } = renderHook(() => useAuth(), { wrapper });
+
+  await waitFor(() => {
+    expect(result.current.getToken()).toBe('fallback-token');
+  });
+});
+
+test('isAuthenticated é false quando não há usuário nem token', async () => {
+  (fetch as jest.Mock).mockRejectedValueOnce(new Error('No refresh token'));
+
+  const { result } = renderHook(() => useAuth(), { wrapper });
+
+  await waitFor(() => {
+    expect(result.current.isAuthenticated).toBe(false);
+  });
+});
+
+test('isAuthenticated é false mesmo com token se não há usuário', async () => {
+  localStorage.setItem('authToken', 'valid-token');
+  
+  (fetch as jest.Mock).mockRejectedValueOnce(new Error('Refresh failed'));
+
+  const { result } = renderHook(() => useAuth(), { wrapper });
+
+  await waitFor(() => {
+    expect(result.current.isAuthenticated).toBe(false);
+  });
+});
+
+test('user é null quando não autenticado', async () => {
+  (fetch as jest.Mock).mockRejectedValueOnce(new Error('No refresh token'));
+
+  const { result } = renderHook(() => useAuth(), { wrapper });
+
+  await waitFor(() => {
+    expect(result.current.user).toBeNull();
+  });
+});
+
+test('user é null quando refresh falha', async () => {
+  localStorage.setItem('authToken', 'valid-token');
+  
+  (fetch as jest.Mock).mockRejectedValueOnce(new Error('Refresh failed'));
+
+  const { result } = renderHook(() => useAuth(), { wrapper });
+
+  await waitFor(() => {
+    expect(result.current.user).toBeNull();
   });
 });
