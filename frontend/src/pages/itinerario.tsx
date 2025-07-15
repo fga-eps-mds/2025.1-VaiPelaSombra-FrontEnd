@@ -25,7 +25,7 @@ interface DecodedToken {
 }
 
 const CreateItineraryPage: React.FC = () => {
-  const { getToken, isAuthenticated } = useAuth();
+  const { getToken } = useAuth(); // ✅ Remover isAuthenticated se não existir
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     title: '',
@@ -42,14 +42,30 @@ const CreateItineraryPage: React.FC = () => {
   const [pageLink, setPageLink] = useState('');
   const [copied, setCopied] = useState(false);
 
+  // ✅ Implementar verificação de autenticação sem isAuthenticated
   const verifyAuthentication = useCallback(() => {
-    if (!isAuthenticated) {
+    const token = getToken();
+    
+    if (!token) {
       navigate('/login');
       return false;
     }
 
-    const token = getToken();
-    if (!token) {
+    // Verificar se o token não expirou
+    try {
+      const decoded = jwtDecode<DecodedToken>(token);
+      const currentTime = Math.floor(Date.now() / 1000);
+      
+      if (decoded.exp && decoded.exp < currentTime) {
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('userId');
+        navigate('/login');
+        return false;
+      }
+    } catch (error) {
+      console.error('Token inválido:', error);
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('userId');
       navigate('/login');
       return false;
     }
@@ -73,17 +89,18 @@ const CreateItineraryPage: React.FC = () => {
     }
     
     return true;
-  }, [isAuthenticated, getToken, navigate]);
-
+  }, [getToken, navigate]); // ✅ Dependências corretas
 
   useEffect(() => {
     const isValid = verifyAuthentication();
     if (!isValid) return;
+    
     if (!pageLink) {
       setPageLink(window.location.href);
     }
   }, [verifyAuthentication, pageLink]);
 
+  // ✅ Resto do código permanece igual
   const handleCopyLink = () => {
     navigator.clipboard.writeText(pageLink);
     setCopied(true);
@@ -111,12 +128,10 @@ const CreateItineraryPage: React.FC = () => {
       return;
     }
 
-
     if (isLoading) return;
 
     setIsLoading(true);
     const token = getToken();
-
     let userId: string | null = localStorage.getItem("userId");
 
     if (!userId && token) {
@@ -179,6 +194,7 @@ const CreateItineraryPage: React.FC = () => {
     }
   };
 
+  // ✅ JSX permanece igual
   return (
     <div className="plano-bg">
       <Navbar />

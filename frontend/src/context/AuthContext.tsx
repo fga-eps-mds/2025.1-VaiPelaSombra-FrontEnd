@@ -1,5 +1,5 @@
-import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import { config } from '../config'; // ✅ Importar a configuração correta
+import React, { createContext, useState, useEffect } from 'react';
+import { config } from '../config';
 
 
 interface User {
@@ -17,9 +17,9 @@ interface AuthContextType {
   refresh: () => Promise<void>;
 }
 
-export const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -41,7 +41,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setAccessToken(data.accessToken);
     setUser(data.user);
     
-    // Sincronizar com localStorage
     localStorage.setItem("authToken", data.accessToken);
     if (data.user?.id) {
       localStorage.setItem("userId", data.user.id.toString());
@@ -59,7 +58,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     } finally {
       setAccessToken(null);
       setUser(null);
-      // Limpar localStorage
       localStorage.removeItem("authToken");
       localStorage.removeItem("userId");
     }
@@ -74,8 +72,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const data = await res.json();
     setAccessToken(data.accessToken);
     setUser(data.user);
-    
-    // Atualizar localStorage
+
     localStorage.setItem("authToken", data.accessToken);
     if (data.user?.id) {
       localStorage.setItem("userId", data.user.id.toString());
@@ -85,10 +82,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const initializeAuth = async () => {
       try {
-        await refresh();
+        const storedToken = localStorage.getItem("authToken");
+        if (storedToken) {
+          setAccessToken(storedToken);
+          await refresh();
+        }
       } catch {
         console.log('No valid refresh token');
-        // Se não conseguir fazer refresh, limpar qualquer token antigo
         localStorage.removeItem("authToken");
         localStorage.removeItem("userId");
       } finally {
@@ -117,9 +117,4 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-// eslint-disable-next-line react-refresh/only-export-components
-export const useAuth = () => {
-  const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error('useAuth must be used within AuthProvider');
-  return ctx;
-};
+export { AuthContext };

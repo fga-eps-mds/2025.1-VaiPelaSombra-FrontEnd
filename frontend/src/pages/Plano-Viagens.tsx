@@ -37,7 +37,6 @@ const PlanoViagens: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // ✅ Manter controle simples
   const hasInitialized = useRef(false);
 
   const fetchTravelPlans = useCallback(async () => {
@@ -62,7 +61,7 @@ const PlanoViagens: React.FC = () => {
 
     try {
       const url = `${config.apiBaseUrl}/users/${userId}/itineraries`;
-      console.log('🌐 URL da requisição:', url);
+      console.log(' URL da requisição:', url);
       
       const response = await fetch(url, {
         headers: { 
@@ -71,12 +70,11 @@ const PlanoViagens: React.FC = () => {
         },
       });
 
-      console.log(' Status da resposta:', response.status);
-      console.log(' Response OK:', response.ok);
+      console.log('📡 Status da resposta:', response.status);
+      console.log('📡 Response OK:', response.ok);
 
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error(' Erro na resposta:', errorText);
+        console.error(' Erro na resposta - Status:', response.status);
         throw new Error(`Falha ao buscar os planos de viagem. Status: ${response.status}`);
       }
 
@@ -125,14 +123,14 @@ const PlanoViagens: React.FC = () => {
       setError(errorMessage);
     } finally {
       setIsLoading(false);
-      console.log(' fetchTravelPlans finalizado');
+      console.log('🏁fetchTravelPlans finalizado');
     }
   }, [getToken]);
 
   useEffect(() => {
     if (!hasInitialized.current) {
       hasInitialized.current = true;
-      console.log(' Componente inicializado, chamando fetchTravelPlans');
+      console.log('Componente inicializado, chamando fetchTravelPlans');
       fetchTravelPlans();
     }
   }, [fetchTravelPlans]);
