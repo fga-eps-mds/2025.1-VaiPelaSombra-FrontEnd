@@ -39,7 +39,6 @@ test('getToken retorna null quando não há token', async () => {
 
   const { result } = renderHook(() => useAuth(), { wrapper });
 
-  // ✅ Aguardar o loading terminar
   await waitFor(() => {
     expect(result.current.getToken()).toBeNull();
   });

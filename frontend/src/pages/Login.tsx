@@ -2,8 +2,8 @@ import { useState } from "react"
 import { useNavigate } from "react-router-dom";
 import imagem4 from '../assets/imagem4.jpg';
 import Umbrella from '../assets/umbrella.svg';
-import EyeToggle from '../components/ui/eye_toggle';
 import estilo from '../assets/estilo.png';
+import EyeToggle from '../components/ui/eye_toggle';
 //import {config} from '../config';
 import { useAuth } from "../hooks/useAuth";
 
@@ -174,7 +174,8 @@ function Login() {
             <div className="w-full flex flex-col space-y-2 px-7 pt-3">
               {/* Spinner do carregamento  */}
               {loading ? (
-                <div className="flex justify-center items-center py-3">
+                <div className="flex justify-center items-center py-3" 
+                        data-testid="loading-spinner">
                   <div className="w-6 h-6 border-4 border-[#223A60] border-t-transparent rounded-full animate-spin"></div>
                 </div>
               ) : (

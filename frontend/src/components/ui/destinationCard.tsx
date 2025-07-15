@@ -18,7 +18,7 @@ export default function DestinationCard({ title, imageUrl, id }: Destination) {
 
   return (
     <div
-      onClick={() => navigate(`/inf-destino/${id}`)}
+      onClick={() => navigate(`/destination-info/${id}`)}
       className="cursor-pointer rounded-2xl shadow-md bg-white overflow-hidden transition transform hover:scale-105 md:hover:shadow-lg md:hover:scale-[1.03]"
     >
       <img

@@ -34,34 +34,36 @@ const PlanoViagens: React.FC = () => {
   const [travelHistory, setTravelHistory] = useState<TravelPlan[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [linkInput, setLinkInput] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // ✅ Usar apenas uma estratégia de controle
   const hasInitialized = useRef(false);
+  const isRequestInProgress = useRef(false);
 
   const fetchTravelPlans = useCallback(async () => {
-    console.log(' Iniciando fetchTravelPlans...');
-    
+    // ✅ Evitar requisições simultâneas
+    if (isRequestInProgress.current) {
+      return;
+    }
+
+    isRequestInProgress.current = true;
     setIsLoading(true);
     setError(null);
     
     const token = getToken();
     const userId = localStorage.getItem("userId");
 
-    console.log(' Token:', token ? 'Presente' : 'Ausente');
-    console.log(' UserId:', userId);
-
     if (!token || !userId) {
       const errorMsg = "Usuário não autenticado.";
-      console.error('', errorMsg);
       setError(errorMsg);
       setIsLoading(false);
+      isRequestInProgress.current = false;
       return;
     }
 
     try {
       const url = `${config.apiBaseUrl}/users/${userId}/itineraries`;
-      console.log(' URL da requisição:', url);
       
       const response = await fetch(url, {
         headers: { 
@@ -70,16 +72,11 @@ const PlanoViagens: React.FC = () => {
         },
       });
 
-      console.log('📡 Status da resposta:', response.status);
-      console.log('📡 Response OK:', response.ok);
-
       if (!response.ok) {
-        console.error(' Erro na resposta - Status:', response.status);
         throw new Error(`Falha ao buscar os planos de viagem. Status: ${response.status}`);
       }
 
       const data: ApiItinerary[] = await response.json();
-      console.log(' Dados recebidos:', data);
 
       const now = new Date();
       const upcoming: ApiItinerary[] = [];
@@ -111,26 +108,22 @@ const PlanoViagens: React.FC = () => {
       const formattedUpcoming = upcoming.map((p) => formatPlan(p));
       const formattedHistory = history.map((p) => formatPlan(p, true));
 
-      console.log(' Planos futuros:', formattedUpcoming);
-      console.log(' Histórico:', formattedHistory);
-
       setTravelPlans(formattedUpcoming);
       setTravelHistory(formattedHistory);
       
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Ocorreu um erro desconhecido.";
-      console.error(" Erro ao buscar planos:", err);
       setError(errorMessage);
     } finally {
       setIsLoading(false);
-      console.log('🏁fetchTravelPlans finalizado');
+      isRequestInProgress.current = false;
     }
   }, [getToken]);
+
 
   useEffect(() => {
     if (!hasInitialized.current) {
       hasInitialized.current = true;
-      console.log('Componente inicializado, chamando fetchTravelPlans');
       fetchTravelPlans();
     }
   }, [fetchTravelPlans]);
@@ -176,9 +169,17 @@ const PlanoViagens: React.FC = () => {
       fetchTravelPlans();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Ocorreu um erro.");
-      console.error("Erro ao entrar com link:", err);
     }
   }, [getToken, linkInput, fetchTravelPlans]);
+
+  const handleLinkInputChange = useCallback((value: string) => {
+    setLinkInput(value);
+  }, []);
+
+  const handleCloseModal = useCallback(() => {
+    setShowModal(false);
+    setLinkInput("");
+  }, []);
 
   return (
     <div className="plano-viagens-bg">
@@ -228,9 +229,9 @@ const PlanoViagens: React.FC = () => {
         <Modal
           title="Insira o link do plano de viagem"
           inputValue={linkInput}
-          onInputChange={setLinkInput}
+          onInputChange={handleLinkInputChange}
           onConfirm={handleConfirmLink}
-          onCancel={() => setShowModal(false)}
+          onCancel={handleCloseModal}
         />
       )}
     </div>

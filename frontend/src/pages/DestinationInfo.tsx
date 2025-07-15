@@ -1,242 +1,177 @@
 import { Button } from "@/components/ui/button";
-import { toast, Toaster } from "sonner";
-import { Heart, SquareArrowOutUpRight, CalendarPlus, ChevronDownIcon, BookmarkPlus, Bookmark } from "lucide-react";
-import {
-    Tabs,
-    TabsContent,
-    TabsList,
-    TabsTrigger,
-} from "@/components/ui/tabs"
-import {
-    DropdownMenu,
-    DropdownMenuCheckboxItem,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import {
-    Dialog,
-    DialogClose,
-    DialogContent,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import React, { useId, useState } from "react";
-import { DropdownMenuCheckboxItemProps } from "@radix-ui/react-dropdown-menu"
+import { Toaster } from "sonner";
+import { CalendarPlus, Info, BookOpen, Earth } from "lucide-react";
+import { Tabs,TabsContent, TabsList, TabsTrigger,} from "@/components/ui/tabs";
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { config } from "@/config";
 
-type Checked = DropdownMenuCheckboxItemProps["checked"]
+interface Destination {
+    id: number;
+    title: string;
+    locationName: string;
+    description: string;
+    localClimate?: string;
+    timeZone?: string;
+    latitude: number;
+    longitude: number;
+}
+
+interface DestinationImage {
+    id: number;
+    url: string;
+}
 
 export default function DestinationInfo() {
+    const { id } = useParams<{ id: string }>();
+    const navigate = useNavigate();
 
-    const id = useId()
-    const [inputValue, setInputValue] = useState("")
-    const [isCreateListDialogOpen, setIsCreateListDialogOpen] = useState(false);
-    const [isSaved, setIsSaved] = React.useState<Checked>(false);
+    const [destination, setDestination] = useState<Destination | null>(null);
+    const [images, setImages] = useState<DestinationImage[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
-    const toggleSave = () => {
-        setIsSaved(prevIsSaved => !prevIsSaved);
-        if (!isSaved) {
-            toast.success("Destino salvo com sucesso!");
-        } else {
-            toast.info("Destino removido dos salvos.");
-        }
-    };
+    useEffect(() => {
+        if (!id) return;
+
+        const fetchDestinationData = async () => {
+            setLoading(true);
+            setError(null);
+            try {
+                const [destinationResponse, imagesResponse] = await Promise.all([
+                    fetch(`${config.apiBaseUrl}/destinations/${id}`),
+                    fetch(`${config.apiBaseUrl}/destinations/${id}/images`)
+                ]);
+
+                if (!destinationResponse.ok || !imagesResponse.ok) {
+                    throw new Error("Falha ao carregar dados do destino.");
+                }
+
+                const destinationData: Destination = await destinationResponse.json();
+                const imagesData: DestinationImage[] = await imagesResponse.json();
+
+                setDestination(destinationData);
+                setImages(imagesData);
+
+            } catch (err) {
+                if (err instanceof Error) {
+                    setError(err.message);
+                } else {
+                    setError("Ocorreu um erro desconhecido.");
+                }
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchDestinationData();
+    }, [id]);
+
+    const handlePlanTrip = () => navigate('/criar-plano');
+    const handleSeeDestinations = () => navigate('/home');
+
+    if (loading) {
+        return (
+            <div className="m-10">
+                <div className="text-center p-20 font-mono">
+                    Carregando destino...
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="m-10">
+                <div className="text-center p-20 font-mono">
+                    <span className="text-red-500">{error}</span>
+                </div>
+            </div>
+        );
+    }
+
+    if (!destination) {
+        return (
+            <div className="m-10">
+                <div className="text-center p-20 font-mono">
+                    Destino não encontrado.
+                </div>
+            </div>
+        );
+    }
 
     return (
-        <main className="m-10 w-screen max-w-screen-xl xl:mx-auto">
-            <section className="flex justify-between">
+        <div className="m-10 w-screen max-w-screen-xl xl:mx-auto">
+            <section className="flex justify-between items-center">
                 <div>
-                    <h1 className="text-3xl font-mono font-extrabold">Rio de Janeiro</h1>
-                    <h4 className="text-gray-600">Brasil</h4>
+                    <h1 className="text-3xl font-mono font-extrabold">{destination.title}</h1>
+                    <h4 className="text-gray-600 text-lg">{destination.locationName}</h4>
                 </div>
-                <div className="flex justify-between w-104">
-                    <Button className="cursor-pointer" variant="outline" onClick={() => toast.info("Destino salvo com sucesso!")}>
-                        <SquareArrowOutUpRight />Ver Mais
+
+                <div className="flex items-center gap-x-2">
+                    <Button variant="outline" onClick={handleSeeDestinations}>
+                        <Earth className="mr-2 h-4 w-4 text-[#223A60]" />
+                        Explorar Destinos
                     </Button>
-                    <div className="inline-flex -space-x-px rounded-md rtl:space-x-reverse">
-                        <Button className="rounded-none shadow-none first:rounded-s-md last:rounded-e-md focus-visible:z-10 cursor-pointer" variant="outline" onClick={() => toggleSave()}>
-                            <Heart
-                                    className={`transition-colors duration-150 ${isSaved ? 'text-red-500' : 'text-current'}`} 
-                                    fill={isSaved ? 'currentColor' : 'none'}
-                                />
-                            Salvar
-                        </Button>
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button
-                                    className="rounded-none shadow-none first:rounded-s-md last:rounded-e-md focus-visible:z-10 cursor-pointer"
-                                    variant="outline"
-                                    size="icon"
-                                    aria-label="Open link"
-                                >
-                                    <ChevronDownIcon size={16} aria-hidden="true" />
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent>
-                                <DropdownMenuCheckboxItem 
-                                    checked={isSaved}
-                                    onCheckedChange={setIsSaved}
-                                    className="[&>span:first-child]:hidden pl-2"
-                                    >
-                                    
-                                    <Bookmark 
-                                        size={16} aria-hidden="true" className={`text-black transition-colors duration-150 ${isSaved ? 'text-red-500' : 'text-current'}`} 
-                                        fill={isSaved ? 'currentColor' : 'none'}/>
-                                Favoritos
-                                </DropdownMenuCheckboxItem>
-                                <DropdownMenuCheckboxItem 
-                                    checked={isSaved}
-                                    onCheckedChange={setIsSaved}
-                                    className="[&>span:first-child]:hidden pl-2"
-                                    >
-                                    
-                                    <Bookmark 
-                                        size={16} aria-hidden="true" className={`text-black transition-colors duration-150 ${isSaved ? 'text-red-500' : 'text-current'}`} 
-                                        fill={isSaved ? 'currentColor' : 'none'}/>
-                                Rumo a Xique-Xique
-                                </DropdownMenuCheckboxItem>
-                                <DropdownMenuCheckboxItem 
-                                    checked={isSaved}
-                                    onCheckedChange={setIsSaved}
-                                    className="[&>span:first-child]:hidden pl-2"
-                                    >
-                                    
-                                    <Bookmark 
-                                        size={16} aria-hidden="true" className={`text-black transition-colors duration-150 ${isSaved ? 'text-red-500' : 'text-current'}`} 
-                                        fill={isSaved ? 'currentColor' : 'none'}/>
-                                RockInRio2077
-                                </DropdownMenuCheckboxItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem onSelect={() => setIsCreateListDialogOpen(true)}><BookmarkPlus size={16} className="text-black" aria-hidden="true" />Criar nova lista</DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                    </div>
-                    <Button className="cursor-pointer">
-                        <CalendarPlus />Planejar Viagem
+                    <Button onClick={handlePlanTrip}>
+                        <CalendarPlus className="mr-2 h-4 w-4" />
+                        Planejar Viagem
                     </Button>
                 </div>
             </section>
-            <section className="mt-5">
-                <div className="flex">
-                    <div className="w-1/2 bg-gray-300 h-100 mr-2 rounded-md">
-                        <img
-                            src={'/src/assets/images/Imagen_de_los_canales_concéntricos_en_Ámsterdam.webp'}
-                            alt="IMAGE1"
-                            className="w-full h-full object-cover rounded-md"
-                        />
+
+            <section className="mt-8">
+                <div className="flex h-[400px]">
+                    <div className="w-1/2 bg-gray-200 mr-2 rounded-md">
+                        {images.length > 0 && <img src={`${config.apiBaseUrl}${images[0].url}`} alt={`Imagem principal de ${destination.title}`} className="w-full h-full object-cover rounded-md"/>}
                     </div>
-                    <div className="grid grid-cols-2 gap-4 w-1/2 bg-white h-100 ml-2">
-                        <div className="bg-gray-300 rounded-md h-full w-full overflow-hidden">
-                            <img
-                                src={'/src/assets/images/View_of_Empire_State_Building_from_Rockefeller_Center_New_York_City_dllu.webp'}
-                                alt="IMAGE1"
-                                className="w-full h-full object-cover rounded-md"
-                            />
-                        </div>
-                        <div className="bg-gray-300 rounded-md h-full w-full overflow-hidden">
-                            <img
-                                src={'/src/assets/images/hq720.jpg'}
-                                alt="IMAGE1"
-                                className="w-full h-full object-cover rounded-md"
-                            />
-                        </div>
-                        <div className="bg-gray-300 rounded-md h-full w-full overflow-hidden">
-                            <img
-                                src={'/src/assets/images/Paracas_National_Reserve._Ica,_Peru.webp'}
-                                alt="IMAGE1"
-                                className="w-full h-full object-cover rounded-md"
-                            />
-                        </div>
-                        <div className="bg-gray-300 rounded-md h-full w-full overflow-hidden">
-                            <img
-                                src={'/src/assets/images/La_Tour_Eiffel_vue_de_la_Tour_Saint-Jacques,_Paris_août_2014_(2).webp'}
-                                alt="IMAGE1"
-                                className="w-full h-full object-cover rounded-md"
-                            />
-                        </div>
+                    <div className="grid grid-cols-2 gap-4 w-1/2 ml-2">
+                        {images.slice(1, 5).map(image => (
+                            <div key={image.id} className="bg-gray-200 rounded-md h-full w-full overflow-hidden">
+                                <img src={`${config.apiBaseUrl}${image.url}`} alt={`Imagem de ${destination.title}`} className="w-full h-full object-cover rounded-md"/>
+                            </div>
+                        ))}
                     </div>
                 </div>
             </section>
-            <section className="flex mt-10 w-full">
-                <Tabs defaultValue="tab-1" orientation="vertical" className="w-full">
-                    <TabsList>
-                        <TabsTrigger value="tab-1" className="cursor-pointer">Visao Geral</TabsTrigger>
-                        <TabsTrigger value="tab-2" className="cursor-pointer">Hospedagens</TabsTrigger>
-                        <TabsTrigger value="tab-3" className="cursor-pointer">Pontos Turisticos</TabsTrigger>
-                        <TabsTrigger value="tab-4" className="cursor-pointer">Restaurantes</TabsTrigger>
-                    </TabsList>
-                    <TabsContent value="tab-1">
-                        <section className="w-full h-100 mr-2">
-                            <h2 className="text-2xl font-mono font-extrabold">Sobre Rio de Janeiro</h2>
-                            <p className="text-gray-800 break-words mt-2">
-                                O Rio de Janeiro é uma das cidades mais conhecidas do Brasil, famosa por suas paisagens naturais, sua cultura vibrante e sua importância histórica. Localizado na região Sudeste do país, o Rio é cercado por montanhas, florestas e praias que atraem visitantes do mundo inteiro. O Cristo Redentor, uma das sete maravilhas do mundo moderno, fica no alto do morro do Corcovado e é um dos principais símbolos da cidade. A cidade também é marcada pelo Pão de Açúcar, que oferece uma vista panorâmica impressionante, e pelas praias de Copacabana e Ipanema, conhecidas por sua beleza e pelo estilo de vida descontraído.
-                            </p>
-                            <p className="text-gray-800 break-words mt-2">
-                                Além de suas belezas naturais, o Rio tem uma rica herança cultural. O samba, o carnaval e as escolas de samba fazem parte da identidade carioca, refletindo a diversidade e a criatividade do povo. Durante o carnaval, a cidade se transforma com desfiles, festas e blocos de rua que reúnem milhões de pessoas. A vida urbana do Rio é intensa e contrastante, com regiões de grande desenvolvimento ao lado de áreas que enfrentam desafios sociais.</p>
-                        </section>
-                    </TabsContent>
-                    <TabsContent value="tab-2">
-                        <section className="w-full h-100 mr-2">
-                            Tab 2
-                        </section>
-                    </TabsContent>
-                    <TabsContent value="tab-3">
-                        <section className="w-full h-100 mr-2">
-                            Tab 3
-                        </section>
-                    </TabsContent>
-                    <TabsContent value="tab-4">
-                        <section className="w-full h-100 mr-2">
-                            Tab 4
-                        </section>
-                    </TabsContent>
-                </Tabs>
-            </section>
 
-            <Dialog open={isCreateListDialogOpen} onOpenChange={setIsCreateListDialogOpen}>
-                <DialogContent className="w-100">
-                    <div className="flex flex-col items-start gap-2">
-                        <DialogHeader>
-                            <DialogTitle className="text-2xl font-mono font-bold">
-                                Criar uma nova lista
-                            </DialogTitle>
-                        </DialogHeader>
-                    </div>
+            <Tabs defaultValue="overview" className="mt-10 w-full">
+                <TabsList className="grid w-full grid-cols-2 md:w-[400px]">
+                    <TabsTrigger value="overview">
+                        <BookOpen className="mr-2 h-4 w-4"/> Visão Geral
+                    </TabsTrigger>
+                    <TabsTrigger value="informacoes">
+                        <Info className="mr-2 h-4 w-4"/> Informações Específicas
+                    </TabsTrigger>
+                </TabsList>
 
-                    <form className="space-y-5">
-                        <div className="*:not-first:mt-2">
-                            <Label htmlFor={id}>Nome da lista</Label>
-                            <Input
-                                id={id}
-                                type="text"
-                                placeholder="Digite o nome da lista"
-                                value={inputValue}
-                                onChange={(e) => setInputValue(e.target.value)}
-                            />
+                <TabsContent value="overview" className="mt-4">
+                    <h2 className="text-2xl font-mono font-extrabold">Sobre {destination.title}</h2>
+                    <p className="text-gray-800 break-words mt-4 leading-relaxed">
+                        {destination.description}
+                    </p>
+                </TabsContent>
+
+                <TabsContent value="informacoes" className="mt-1">
+                    <h2 className="text-2xl font-mono font-extrabold">Informações</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4 p-4 border rounded-lg">
+                        <div>
+                            <p className="font-semibold text-gray-700">Clima Local</p>
+                            <p className="text-gray-900">{destination.localClimate || 'Não informado'}</p>
                         </div>
-                        <DialogFooter>
-                            <DialogClose asChild>
-                                <Button type="button" variant="outline" className="flex-1 cursor-pointer">
-                                    Cancelar
-                                </Button>
-                            </DialogClose>
-                            <Button
-                                type="button"
-                                className="flex-1 cursor-pointer"
-                                disabled={inputValue.length == 0}
-                            >
-                                Criar
-                            </Button>
-                        </DialogFooter>
-                    </form>
-                </DialogContent>
-            </Dialog>
+                        <div>
+                            <p className="font-semibold text-gray-700">Fuso Horário</p>
+                            <p className="text-gray-900">{destination.timeZone || 'Não informado'}</p>
+                        </div>
+                        <div>
+                            <p className="font-semibold text-gray-700">Coordenadas</p>
+                            <p className="text-gray-900">{`Latitude: ${destination.latitude}, Longitude: ${destination.longitude}`}</p>
+                        </div>
+                    </div>
+                </TabsContent>
+            </Tabs>
 
-            <Toaster></Toaster>
-        </main>
+            <Toaster />
+        </div>
     );
 }
