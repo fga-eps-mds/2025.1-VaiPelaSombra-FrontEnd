@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react"; 
 import { useNavigate, useParams } from "react-router-dom";
 import Navbar from "../components/NavBar";
 import "./Plano-Viagens.css";
@@ -45,54 +45,54 @@ const EditarItinerario: React.FC = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-const fetchItinerary = async () => {
-  try {
-    if (!itineraryId || !token) {
-      setError("ID do itinerário ou token de autenticação não encontrado.");
-      return;
+
+  const fetchItinerary = useCallback(async () => {
+    try {
+      if (!itineraryId || !token) {
+        console.warn("ID do itinerário ou token de autenticação não encontrado. Não foi possível buscar o itinerário.");
+        return;
+      }
+
+      setIsLoading(true);
+      setError(null);
+
+      const response = await fetch(`${config.apiBaseUrl}/itineraries/${itineraryId}`, {
+        method: "GET",
+        headers: { 
+          "Content-Type": "application/json", 
+          Authorization: `Bearer ${token}`, 
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: "Erro desconhecido" }));
+        throw new Error(`Erro ao carregar o itinerário: ${response.status} - ${errorData.message || response.statusText}`);
+      }
+
+      const plan: ItineraryData = await response.json();
+
+      setFormData({
+        title: plan.title || "",
+        startDate: plan.startDate ? plan.startDate.split("T")[0] : "",
+        endDate: plan.endDate ? plan.endDate.split("T")[0] : "",
+        lodgingBudget: plan.lodgingBudget?.toString() || "",
+        foodBudget: plan.foodBudget?.toString() || "",
+        totalBudget: plan.totalBudget?.toString() || "",
+      });
+
+    } catch (err: unknown) { 
+      console.error("Erro no fetchItinerary:", err);
+      setError(err instanceof Error ? err.message : "Erro ao carregar dados da viagem.");
+    } finally {
+      setIsLoading(false);
     }
-
-    setIsLoading(true);
-    setError(null);
-
-    const response = await fetch(`${config.apiBaseUrl}/itineraries/${itineraryId}`, {
-      method: "GET",
-      headers: { 
-        "Content-Type": "application/json", 
-        Authorization: `Bearer ${token}`, 
-      },
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ message: "Erro desconhecido" }));
-      throw new Error(`Erro ao carregar o itinerário: ${response.status} - ${errorData.message || response.statusText}`);
-    }
-
-    const plan: ItineraryData = await response.json();
-
-    setFormData({
-      title: plan.title || "",
-      startDate: plan.startDate ? plan.startDate.split("T")[0] : "",
-      endDate: plan.endDate ? plan.endDate.split("T")[0] : "",
-      lodgingBudget: plan.lodgingBudget?.toString() || "",
-      foodBudget: plan.foodBudget?.toString() || "",
-      totalBudget: plan.totalBudget?.toString() || "",
-    });
-
-  } catch (err: any) {
-    console.error("Erro no fetchItinerary:", err);
-    setError(err.message || "Erro ao carregar dados da viagem.");
-  } finally {
-    setIsLoading(false);
-  }
-};
+  }, [itineraryId, token]); 
 
   useEffect(() => {
-
     if (itineraryId && token) {
       fetchItinerary();
     }
-  }, [itineraryId, token]); 
+  }, [itineraryId, token, fetchItinerary]); // Adicione fetchItinerary aqui
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -136,9 +136,9 @@ const fetchItinerary = async () => {
 
       alert("Plano de viagem atualizado com sucesso!");
       navigate("/plano-viagens"); 
-    } catch (err: any) {
+    } catch (err: unknown) { 
       console.error("Erro no handleSubmit:", err);
-      setError(err.message || "Erro ao atualizar plano.");
+      setError(err instanceof Error ? err.message : "Erro ao atualizar plano.");
     } finally {
       setIsLoading(false);
     }
