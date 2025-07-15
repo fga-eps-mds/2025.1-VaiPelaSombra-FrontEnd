@@ -62,7 +62,12 @@ const renderPage = async () => {
   await screen.findByLabelText(/título da viagem/i);
 };
 
+
 test.skip('submete o formulário com sucesso e redireciona', async () => {
+  (global.fetch as jest.Mock).mockResolvedValue({
+    ok: true,
+    json: jest.fn().mockResolvedValue({ id: 'novo-id', title: 'Viagem dos Sonhos' }),
+  });
   const alertSpy = jest.spyOn(window, 'alert').mockImplementation(() => {});
 
   await renderPage();
@@ -80,7 +85,7 @@ test.skip('submete o formulário com sucesso e redireciona', async () => {
 
   await waitFor(() => {
     expect(global.fetch).toHaveBeenCalledWith(
-      'http://localhost:3000/itineraries/123',
+      'http://localhost:3000/itineraries/123', //
       expect.objectContaining({
         method: 'POST',
         headers: {
