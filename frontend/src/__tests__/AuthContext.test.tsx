@@ -105,9 +105,12 @@ describe('AuthContext', () => {
   });
 
   test('deve realizar login com sucesso', async () => {
+    // Clear any existing state
+    localStorage.clear();
+    
     // Mock the initial refresh attempt to fail, then mock successful login
     (fetch as jest.Mock)
-      .mockRejectedValueOnce(new Error('No refresh token')) // Initial refresh fails
+      .mockRejectedValueOnce(new Error('No refresh token'))
       .mockResolvedValueOnce({
         ok: true,
         json: async () => ({
@@ -128,7 +131,7 @@ describe('AuthContext', () => {
       );
     });
 
-    // Wait for initial render
+    // Wait for initial render to complete
     await waitFor(() => {
       expect(screen.getByText('Login')).toBeInTheDocument();
       expect(screen.getByTestId('auth-status')).toHaveTextContent('not-authenticated');
@@ -139,15 +142,14 @@ describe('AuthContext', () => {
       fireEvent.click(screen.getByText('Login'));
     });
 
-    // Wait for login to complete
+    // Wait for login to complete and check all expectations together
     await waitFor(() => {
       expect(screen.getByTestId('auth-status')).toHaveTextContent('authenticated');
-    }, { timeout: 3000 });
-
-    await waitFor(() => {
       expect(screen.getByTestId('user-email')).toHaveTextContent('test@test.com');
-    });
+      expect(screen.getByTestId('user-info')).toHaveTextContent('Test User');
+    }, { timeout: 5000 });
 
+    // Check localStorage
     expect(localStorage.getItem('authToken')).toBe('login-success-token');
     expect(localStorage.getItem('userId')).toBe('1');
   });
