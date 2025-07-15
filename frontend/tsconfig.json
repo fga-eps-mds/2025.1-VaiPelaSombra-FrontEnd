@@ -3,7 +3,8 @@
     "target": "ESNext",
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
     "jsx": "react-jsx",
-    "moduleResolution": "node",
+    "module": "ESNext", 
+    "moduleResolution": "bundler", 
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
@@ -13,16 +14,17 @@
     "noEmit": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "noImplicitAny": false, 
-    "baseUrl": "./", 
+    "noImplicitAny": false,
+    "baseUrl": "./",
     "paths": {
-      // "@assets/*": ["src/assets/*"]
-    }
+      "@/*": ["./src/*"]
+    },
+    "allowImportingTsExtensions": true 
   },
   "include": [
     "src/**/*.ts",
     "src/**/*.tsx",
-    "src/**/*.d.ts" 
+    "src/**/*.d.ts"
   ],
   "exclude": [
     "node_modules"
