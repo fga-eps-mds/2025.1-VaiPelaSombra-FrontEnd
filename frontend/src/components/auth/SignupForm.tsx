@@ -18,6 +18,7 @@ import axios from "axios";
 import { useState } from "react";
 import EyeToggle from "../ui/eye_toggle";
 import SuccessModal from "../ui/sucessModal";
+import { config } from "@/config";
 
 export default function SignupForm() {
         const [showPassword, setShowPassword] = useState(false);
@@ -44,7 +45,7 @@ export default function SignupForm() {
               password: data.password,
             };
 
-            await axios.post("http://localhost:3000/users", payload);
+            await axios.post(`${config.apiBaseUrl}/users`, payload);
 
             form.reset();
             setShowModal(true)
