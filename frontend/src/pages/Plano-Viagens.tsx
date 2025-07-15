@@ -1,11 +1,11 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import Navbar from "../components/NavBar.tsx";
 import TravelPlanCard from "../components/TravelPlanCard";
 import Modal from "../components/ui/modal";
 import "./Plano-Viagens.css";
 import NavigateButton from "../components/NavigateButton";
 import { config } from "../config";
-import { useAuth } from "../hooks/useAuth"; // ✅ Adicionar useAuth
+import { useAuth } from "../hooks/useAuth";
 
 type User = {
   id: number;
@@ -37,32 +37,52 @@ const PlanoViagens: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // ✅ Manter controle simples
+  const hasInitialized = useRef(false);
+
   const fetchTravelPlans = useCallback(async () => {
+    console.log(' Iniciando fetchTravelPlans...');
+    
     setIsLoading(true);
     setError(null);
-    const token = getToken(); // ✅ Usar hook
+    
+    const token = getToken();
     const userId = localStorage.getItem("userId");
 
+    console.log(' Token:', token ? 'Presente' : 'Ausente');
+    console.log(' UserId:', userId);
+
     if (!token || !userId) {
-      setError("Usuário não autenticado.");
+      const errorMsg = "Usuário não autenticado.";
+      console.error('', errorMsg);
+      setError(errorMsg);
       setIsLoading(false);
       return;
     }
 
     try {
-      // ✅ CORRIGIR: Usar endpoint que funciona no backend
-      const response = await fetch(
-        `${config.apiBaseUrl}/users/${userId}/itineraries`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const url = `${config.apiBaseUrl}/users/${userId}/itineraries`;
+      console.log('🌐 URL da requisição:', url);
+      
+      const response = await fetch(url, {
+        headers: { 
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+      });
+
+      console.log(' Status da resposta:', response.status);
+      console.log(' Response OK:', response.ok);
 
       if (!response.ok) {
-        throw new Error("Falha ao buscar os planos de viagem.");
+        const errorText = await response.text();
+        console.error(' Erro na resposta:', errorText);
+        throw new Error(`Falha ao buscar os planos de viagem. Status: ${response.status}`);
       }
 
       const data: ApiItinerary[] = await response.json();
+      console.log(' Dados recebidos:', data);
+
       const now = new Date();
       const upcoming: ApiItinerary[] = [];
       const history: ApiItinerary[] = [];
@@ -90,24 +110,35 @@ const PlanoViagens: React.FC = () => {
         faded,
       });
 
-      setTravelPlans(upcoming.map((p) => formatPlan(p)));
-      setTravelHistory(history.map((p) => formatPlan(p, true)));
+      const formattedUpcoming = upcoming.map((p) => formatPlan(p));
+      const formattedHistory = history.map((p) => formatPlan(p, true));
+
+      console.log(' Planos futuros:', formattedUpcoming);
+      console.log(' Histórico:', formattedHistory);
+
+      setTravelPlans(formattedUpcoming);
+      setTravelHistory(formattedHistory);
+      
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Ocorreu um erro desconhecido."
-      );
-      console.error("Erro ao buscar planos:", err);
+      const errorMessage = err instanceof Error ? err.message : "Ocorreu um erro desconhecido.";
+      console.error(" Erro ao buscar planos:", err);
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
+      console.log(' fetchTravelPlans finalizado');
     }
-  }, [getToken]); // ✅ Adicionar dependência
+  }, [getToken]);
 
   useEffect(() => {
-    fetchTravelPlans();
+    if (!hasInitialized.current) {
+      hasInitialized.current = true;
+      console.log(' Componente inicializado, chamando fetchTravelPlans');
+      fetchTravelPlans();
+    }
   }, [fetchTravelPlans]);
 
-  const handleConfirmLink = async () => {
-    const token = getToken(); // ✅ Usar hook
+  const handleConfirmLink = useCallback(async () => {
+    const token = getToken();
     const userId = localStorage.getItem("userId");
 
     if (!token || !userId) {
@@ -124,13 +155,13 @@ const PlanoViagens: React.FC = () => {
         return;
       }
 
-      // ✅ Este endpoint parece correto, manter como está
       const response = await fetch(
         `${config.apiBaseUrl}/itineraries/${itineraryId}/users/${userId}`,
         {
           method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
           },
         }
       );
@@ -143,12 +174,13 @@ const PlanoViagens: React.FC = () => {
       alert("Você entrou com sucesso no plano de viagem!");
       setShowModal(false);
       setLinkInput("");
+      
       fetchTravelPlans();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Ocorreu um erro.");
       console.error("Erro ao entrar com link:", err);
     }
-  };
+  }, [getToken, linkInput, fetchTravelPlans]);
 
   return (
     <div className="plano-viagens-bg">
@@ -157,7 +189,7 @@ const PlanoViagens: React.FC = () => {
         <div className="plano-viagens-actions">
           <div className="primary-navigate-button-container">
             <NavigateButton
-              to="/criar-plano"
+              to="/itinerario"
               label="+ Criar um novo plano de viagem"
             />
           </div>
@@ -166,15 +198,15 @@ const PlanoViagens: React.FC = () => {
           </button>
         </div>
 
-        {isLoading && <p>Carregando planos</p>}
+        {isLoading && <p>Carregando planos...</p>}
         {error && <p style={{ color: "red" }}>{error}</p>}
 
         <>
           <h2 className="plano-viagens-section-title">Seus planos de viagens</h2>
           <div className="plano-viagens-cards">
             {travelPlans.length > 0 ? (
-              travelPlans.map((plan, idx) => (
-                <TravelPlanCard key={idx} {...plan} itineraryId={plan.id} />
+              travelPlans.map((plan) => (
+                <TravelPlanCard key={plan.id} {...plan} itineraryId={plan.id} />
               ))
             ) : (
               <p>Você não tem nenhuma viagem planejada.</p>
@@ -184,8 +216,8 @@ const PlanoViagens: React.FC = () => {
           <h2 className="plano-viagens-section-title">Histórico de planos de viagens</h2>
           <div className="plano-viagens-cards">
             {travelHistory.length > 0 ? (
-              travelHistory.map((plan, idx) => (
-                <TravelPlanCard key={idx} {...plan} itineraryId={plan.id} />
+              travelHistory.map((plan) => (
+                <TravelPlanCard key={plan.id} {...plan} itineraryId={plan.id} />
               ))
             ) : (
               <p>Nenhuma viagem no seu histórico ainda.</p>
