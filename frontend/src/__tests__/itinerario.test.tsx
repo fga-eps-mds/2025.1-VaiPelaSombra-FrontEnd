@@ -26,7 +26,7 @@ beforeEach(() => {
   localStorage.setItem('authToken', 'fake-token');
   localStorage.setItem('userId', '123');
 
-  (global.fetch as jest.Mock).mockImplementation((url, options) => {
+  (global.fetch as jest.Mock).mockImplementation((url) => {
     if (url === 'http://localhost:3000/auth/refresh') {
       return Promise.resolve({
         ok: true,
