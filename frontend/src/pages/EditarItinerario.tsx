@@ -79,11 +79,13 @@ const fetchItinerary = async () => {
       totalBudget: plan.totalBudget?.toString() || "",
     });
 
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Erro no fetchItinerary:", err);
-    setError(err.message || "Erro ao carregar dados da viagem.");
-  } finally {
-    setIsLoading(false);
+    if (err instanceof Error) {
+      setError(err.message);
+    } else {
+    setError("Erro ao carregar dados da viagem.");
+  }
   }
 };
 
@@ -136,11 +138,13 @@ const fetchItinerary = async () => {
 
       alert("Plano de viagem atualizado com sucesso!");
       navigate("/plano-viagens"); 
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Erro no handleSubmit:", err);
-      setError(err.message || "Erro ao atualizar plano.");
-    } finally {
-      setIsLoading(false);
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Erro ao atualizar plano.");
+      }
     }
   };
 
