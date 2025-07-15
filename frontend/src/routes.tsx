@@ -23,11 +23,12 @@ function AppRoutes() {
         <Route path="/plano-viagens" element={<PlanoViagens />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
-        <Route path='/destination-info' element={<DestinationInfo/>} />
+        <Route path='/destination-info/:id' element={<DestinationInfo/>} />
         <Route path="/criar-plano" element={<CreateItineraryPage />} />
         <Route path="/editar-plano/:itineraryId" element={<EditarItinerario />} />
         <Route path="/recover-password" element={<RecoverPassword />} />
         <Route path='/resumo-viagem' element={<ResumoViagem />} />
+
       </Routes>
     </Router>
   );
