@@ -43,6 +43,7 @@ jobs:
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v2
         with:
+          projectBaseDir: .
           args: -Dsonar.typescript.tsconfigPath=frontend/tsconfig.json
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
