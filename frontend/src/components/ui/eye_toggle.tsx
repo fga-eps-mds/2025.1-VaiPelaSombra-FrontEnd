@@ -11,9 +11,9 @@ function EyeToggle({ visible, toggleVisibility, className = "" }: EyeToggleProps
     <button
       type="button"
       onClick={toggleVisibility}
-      className={`text-[#223A60] hover:text-[#223A60] ${className}`}
+      className={`cursor-pointer text-[#223A60] hover:text-[#223A60] ${className}`}
     >
-      {visible ? <Eye size={20} /> : <EyeOff size={20} />}
+      {visible ? <Eye size={19} /> : <EyeOff size={19} />}
     </button>
   );
 }

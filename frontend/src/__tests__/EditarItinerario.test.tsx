@@ -3,6 +3,12 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import EditarItinerarioPage from '../pages/EditarItinerario';
 
+jest.mock('../config/index.ts', () => ({
+  config: {
+    apiBaseUrl: 'http://localhost:3000',
+  },
+}));
+
 const mockNavigate = jest.fn();
 global.fetch = jest.fn();
 

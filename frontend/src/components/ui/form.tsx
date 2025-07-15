@@ -154,9 +154,6 @@ function FormMessage({ className, ...props }: React.ComponentProps<"p">) {
 }
 
 export {
-  /* eslint-disable react-refresh/only-export-components */
-  useFormField,
-  /* eslint-enable react-refresh/only-export-components */
   Form,
   FormItem,
   FormLabel,
@@ -165,3 +162,5 @@ export {
   FormMessage,
   FormField,
 }
+/* eslint-disable-next-line react-refresh/only-export-components */
+export { useFormField }
