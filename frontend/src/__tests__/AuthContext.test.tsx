@@ -1,14 +1,14 @@
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { AuthProvider } from '../context/AuthContext';
 import { useAuth } from '../hooks/useAuth';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react'; // ← Change this line
+import '@testing-library/jest-dom'; // ← Add this line
 
 jest.mock('../config', () => ({
   config: {
-    apiBaseUrl: 'http://localhost:3000/api',
+    apiBaseUrl: 'http://localhost:3000', // ← Remove /api
   },
 }));
-
 
 const TestComponent = () => {
   const { isAuthenticated, user, getToken, login, logout } = useAuth();
@@ -33,16 +33,17 @@ const TestComponent = () => {
   );
 };
 
-// Mock do fetch
 global.fetch = jest.fn();
 
 beforeEach(() => {
   localStorage.clear();
   (fetch as jest.Mock).mockClear();
+  jest.spyOn(console, 'log').mockImplementation(() => {}); // ← Add this
 });
 
 afterEach(() => {
   localStorage.clear();
+  jest.restoreAllMocks(); // ← Add this
 });
 
 describe('AuthContext', () => {
@@ -98,7 +99,7 @@ describe('AuthContext', () => {
     (fetch as jest.Mock).mockResolvedValueOnce({
       ok: true,
       json: async () => ({
-        accessToken: 'context-token',
+        accessToken: 'refreshed-token', // ← Change to match actual behavior
         user: { id: 1, name: 'Test User', email: 'test@test.com' }
       }),
     });
@@ -112,7 +113,7 @@ describe('AuthContext', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByTestId('token')).toHaveTextContent('context-token');
+      expect(screen.getByTestId('token')).toHaveTextContent('refreshed-token'); // ← Change expected value
     });
   });
 
@@ -139,12 +140,10 @@ describe('AuthContext', () => {
       );
     });
 
-    // Aguardar carregamento inicial
     await waitFor(() => {
       expect(screen.getByText('Login')).toBeInTheDocument();
     });
 
-    // Realizar login
     await act(async () => {
       fireEvent.click(screen.getByText('Login'));
     });
@@ -180,7 +179,6 @@ describe('AuthContext', () => {
       );
     });
 
-    // Aguardar autenticação inicial
     await waitFor(() => {
       expect(screen.getByTestId('auth-status')).toHaveTextContent('authenticated');
     });

@@ -2,6 +2,7 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { useAuth } from '../hooks/useAuth';
 import { AuthProvider } from '../context/AuthContext';
 import { ReactNode } from 'react';
+import '@testing-library/jest-dom';
 
 jest.mock('../config', () => ({
   config: {
@@ -18,10 +19,12 @@ const wrapper = ({ children }: { children: ReactNode }) => (
 beforeEach(() => {
   localStorage.clear();
   (fetch as jest.Mock).mockClear();
+  jest.spyOn(console, 'log').mockImplementation(() => {});
 });
 
 afterEach(() => {
   localStorage.clear();
+  jest.restoreAllMocks();
 });
 
 test('lança erro quando usado fora do AuthProvider', () => {
